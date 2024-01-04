@@ -31,10 +31,10 @@
             <uri>file://media/materials/scripts/gazebo.material</uri>
             <name>Gazebo/Grey</name>
           </script>
-          <ambient>0.682 0 1 1</ambient>
-          <diffuse>0.682 0 1 1</diffuse>
-          <specular>0 0 0 1</specular>
-          <emissive>0 0 0 1</emissive>
+          <ambient>1.0 0.0 0.0 1.0</ambient> <!-- Cor ambiente (R, G, B, A) -->
+          <diffuse>1.0 0.0 0.0 1.0</diffuse> <!-- Cor difusa (R, G, B, A) -->
+          <specular>0.1 0.1 0.1 1.0</specular> <!-- Cor especular (R, G, B, A) -->
+          <emissive>0.0 0.0 0.0 0.0</emissive> <!-- Cor emissiva (R, G, B, A) -->
           <shader type='vertex'>
             <normal_map>__default__</normal_map>
           </shader>
