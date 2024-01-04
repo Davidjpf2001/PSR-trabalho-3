@@ -5,11 +5,10 @@ import rospy
 from interactive_markers.interactive_marker_server import *
 from interactive_markers.menu_handler import *
 from visualization_msgs.msg import *
-
 from geometry_msgs.msg import Pose, Point, Quaternion, PoseStamped
-
 from tf.transformations import quaternion_from_euler
 from move_base_msgs.msg import MoveBaseActionResult
+
 
 server = None
 marker_pos = 1
@@ -161,11 +160,11 @@ def main():
                                                  location='bedroom',
                                                  goal_publisher=goal_publisher))
     
-    entry = menu_handler.insert("outra", parent=h_first_entry,
+    entry = menu_handler.insert("back of the bedroam", parent=h_first_entry,
                                 callback=partial(moveTo,
                                                  x=-6.117574, y=3.438049, z=0,
                                                  R=-0.000003, P=0.003170, Y=0.003170,
-                                                 location='outra',
+                                                 location='back of the bedroam',
                                                  goal_publisher=goal_publisher))
 
     
@@ -184,6 +183,7 @@ def main():
                                                  goal_publisher=goal_publisher))
 
     # entry = menu_handler.insert("living room", parent=h_first_entry, callback=moveToLivingRoom)
+
     
 
     makeMenuMarker("marker1")
