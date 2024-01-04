@@ -1,0 +1,43 @@
+<?xml version='1.0'?>
+<sdf version="1.4">
+  <model name="Box_B">
+    <pose>0 0 0.5 0 0 0</pose>
+    <static>true</static>
+    <link name="link_2">
+      <inertial>
+        <mass>1.0</mass>
+        <inertia> <!-- inertias are tricky to compute -->
+          <!-- http://gazebosim.org/tutorials?tut=inertia&cat=build_robot -->
+          <ixx>0.083</ixx>       <!-- for a box: ixx = 0.083 * mass * (y*y + z*z) -->
+          <ixy>0.0</ixy>         <!-- for a box: ixy = 0 -->
+          <ixz>0.0</ixz>         <!-- for a box: ixz = 0 -->
+          <iyy>0.083</iyy>       <!-- for a box: iyy = 0.083 * mass * (x*x + z*z) -->
+          <iyz>0.0</iyz>         <!-- for a box: iyz = 0 -->
+          <izz>0.083</izz>       <!-- for a box: izz = 0.083 * mass * (x*x + y*y) -->
+        </inertia>
+      </inertial>
+      <collision name="collision">
+        <geometry>
+          <box>
+            <size>1 1 1</size>
+          </box>
+        </geometry>
+      </collision>
+      <visual name="visual">
+        <geometry>
+          <box>
+            <size>0.35 0.35 0.35</size>
+          </box>
+        </geometry>
+        <material>
+          <ambient>0.0 0.0 1.0 1.0</ambient> <!-- Cor ambiente (R, G, B, A) -->
+          <diffuse>0.0 0.0 1.0 1.0</diffuse> <!-- Cor difusa (R, G, B, A) -->
+          <specular>0.1 0.1 0.1 1.0</specular> <!-- Cor especular (R, G, B, A) -->
+          <emissive>0.0 0.0 0.0 0.0</emissive> <!-- Cor emissiva (R, G, B, A) -->
+          <shader type="vertex" src=""/> <!-- Shader para o vértice -->
+          <shader type="pixel" src=""/> <!-- Shader para o pixel -->
+        </material>
+      </visual>
+    </link>
+  </model>
+</sdf>
