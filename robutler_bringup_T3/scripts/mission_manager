@@ -149,17 +149,25 @@ def main():
 
     entry = menu_handler.insert("kitchen", parent=h_first_entry,
                                 callback=partial(moveTo,
-                                                 x=6.568593, y=-1.788789, z=0,
-                                                 R=0, P=0, Y=-1.504141,
+                                                 x=6.870983, y=-2.779104, z=0,
+                                                 R=-0.000004, P=0.003169, Y=1.552833,
                                                  location='kitchen',
                                                  goal_publisher=goal_publisher))
 
     entry = menu_handler.insert("bedroom", parent=h_first_entry,
                                 callback=partial(moveTo,
-                                                 x=-4.409525, y=-0.182006, z=0,
-                                                 R=-0.000007, P=0.003198, Y=1.980398,
+                                                 x=-6.126462, y=0.479290, z=0,
+                                                 R=-0.000004, P=0.479290, Y=0.479290,
                                                  location='bedroom',
                                                  goal_publisher=goal_publisher))
+    
+    entry = menu_handler.insert("outra", parent=h_first_entry,
+                                callback=partial(moveTo,
+                                                 x=-6.117574, y=3.438049, z=0,
+                                                 R=-0.000003, P=0.003170, Y=0.003170,
+                                                 location='outra',
+                                                 goal_publisher=goal_publisher))
+
     
     entry = menu_handler.insert("living room", parent=h_first_entry,
                                 callback=partial(moveTo,
@@ -176,9 +184,7 @@ def main():
                                                  goal_publisher=goal_publisher))
 
     # entry = menu_handler.insert("living room", parent=h_first_entry, callback=moveToLivingRoom)
-
-
-   
+    
 
     makeMenuMarker("marker1")
 
