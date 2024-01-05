@@ -13,6 +13,16 @@ else:
     import tty
     import termios
 
+class Colors:
+    RESET = '\033[0m'
+    RED = '\033[91m'
+    GREEN = '\033[92m'
+    YELLOW = '\033[93m'
+    BLUE = '\033[94m'
+    MAGENTA = '\033[95m'
+    CYAN = '\033[96m'
+    WHITE = '\033[97m'
+
 BURGER_MAX_LIN_VEL = 0.22
 BURGER_MAX_ANG_VEL = 2.84
 
@@ -22,27 +32,25 @@ WAFFLE_MAX_ANG_VEL = 1.82
 LIN_VEL_STEP_SIZE = 0.05
 ANG_VEL_STEP_SIZE = 0.1
 
-msg = """
-Control Your TurtleBot3!
----------------------------
-Moving around:
-        w
-   a    s    d
-        x
+msg = f"""
+            {Colors.CYAN}Control Your TurtleBot3{Colors.RESET}
+          {Colors.CYAN}---------------------------{Colors.RESET}
+                {Colors.GREEN}Moving around:{Colors.RESET}
+                    
+                     {Colors.YELLOW}w{Colors.RESET}
+                {Colors.YELLOW}a    s    d{Colors.RESET}
 
-w/x : increase/decrease linear velocity
-a/d : increase/decrease angular velocity
-space key, s : force stop
-m : stop angular velocity  
+      {Colors.YELLOW}w/s{Colors.RESET} : increase/decrease linear velocity
+      {Colors.YELLOW}a/d{Colors.RESET} : increase/decrease angular velocity
+{Colors.YELLOW}space key{Colors.RESET} : force stop
+        {Colors.YELLOW}m{Colors.RESET} : stop angular velocity  
 
-CTRL-C to quit
+{Colors.RED}CTRL-C to quit{Colors.RESET}
 """
 
-e = """
-Communications Failed
+e = f"""
+{Colors.RED}Communications Failed{Colors.RESET}
 """
-
-
 def getKey():
     if os.name == 'nt':
         timeout = 0.1
@@ -139,7 +147,7 @@ if __name__ == "__main__":
                 target_linear_vel = checkLinearLimitVelocity(target_linear_vel + LIN_VEL_STEP_SIZE)
                 status = status + 1
                 print_status(target_linear_vel, target_angular_vel)
-            elif key == 'x':
+            elif key == 's':
                 target_linear_vel = checkLinearLimitVelocity(target_linear_vel - LIN_VEL_STEP_SIZE)
                 status = status + 1
                 print_status(target_linear_vel, target_angular_vel)
@@ -151,7 +159,7 @@ if __name__ == "__main__":
                 target_angular_vel = checkAngularLimitVelocity(target_angular_vel - ANG_VEL_STEP_SIZE)
                 status = status + 1
                 print_status(target_linear_vel, target_angular_vel)
-            elif key == ' ' or key == 's':
+            elif key == ' ':
                 target_linear_vel = 0.0
                 control_linear_vel = 0.0
                 target_angular_vel = 0.0
