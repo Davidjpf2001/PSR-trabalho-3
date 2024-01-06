@@ -185,6 +185,39 @@
     </inertial>
   </link>
 
+  <!-- Adding joint for new (possibly rotating) rgb camera -->
+    <joint name="object_camera_joint" type="fixed">
+    <parent link="camera_rgb_frame"/>
+    <child link="object_joint"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+
+  <link name="object_joint">
+    <visual>
+      <origin xyz="-0.23 0 0.1" rpy="0 0 0"/>
+      <geometry>
+        <cylinder length="0.200" radius="0.0055"/>
+      </geometry>
+      <material name="white"/>
+    </visual>
+
+    <collision>
+      <origin xyz="0.015 0 -0.0065" rpy="0 0 0"/>
+      <geometry>
+        <cylinder length="0.1" radius="0.0055"/>
+      </geometry>
+    </collision>
+
+    <inertial>
+      <mass value="0.114" />
+      <origin xyz="0 0 0" />
+      <inertia ixx="0.001" ixy="0.0" ixz="0.0"
+               iyy="0.001" iyz="0.0"
+               izz="0.001" />
+    </inertial>
+  </link>
+
+
   <joint name="camera_joint" type="fixed">
     <origin xyz="0.073 -0.011 0.084" rpy="0 0 0"/>
     <parent link="base_link"/>
