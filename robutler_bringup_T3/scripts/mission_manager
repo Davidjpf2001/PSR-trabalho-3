@@ -61,6 +61,17 @@ def makeBox(msg):
     marker.color.b = 0.5
     marker.color.a = 0.2
 
+    # #Bola transparente em cima do robo, para parecer que estamos a carregar no robo
+    # marker.type = Marker.SPHERE
+    # marker.scale.x = msg.scale * 0.6  # Ajuste o tamanho da esfera para torná-la um pouco menor
+    # marker.scale.y = msg.scale * 0.6
+    # marker.scale.z = msg.scale * 0.6
+    # marker.color.r = 0.0
+    # marker.color.g = 0.0
+    # marker.color.b = 0.0  # Defina o componente azul para 1.0 para obter uma cor azul clara
+    # marker.color.a = 0.0  # Ajuste a opacidade conforme necessário
+
+
     return marker
 
 
@@ -78,6 +89,9 @@ def makeEmptyMarker(dummyBox=True):
     int_marker.header.frame_id = "base_link"
     int_marker.pose.position.z = marker_pos
     marker_pos += 1
+   
+    #int_marker.pose.position.z = 0  #posição de altura 0, ou seja sobreposto ao robo, para parecer que estamos a carregar no robo
+
     int_marker.scale = 1
     return int_marker
 
@@ -156,14 +170,14 @@ def main():
     entry = menu_handler.insert("bedroom", parent=h_first_entry,
                                 callback=partial(moveTo,
                                                  x=-6.126462, y=0.479290, z=0,
-                                                 R=-0.000004, P=0.479290, Y=0.479290,
+                                                 R=-0.000004, P=0.003169, Y=0.479290,
                                                  location='bedroom',
                                                  goal_publisher=goal_publisher))
     
-    entry = menu_handler.insert("back of the bedroam", parent=h_first_entry,
+    entry = menu_handler.insert("back of the bedroom", parent=h_first_entry,
                                 callback=partial(moveTo,
-                                                 x=-6.117574, y=3.438049, z=0,
-                                                 R=-0.000003, P=0.003170, Y=0.003170,
+                                                 x=-6.117574, y=-3.438049, z=0,
+                                                 R=-0.000003, P=0.003169, Y=0.003170,
                                                  location='back of the bedroam',
                                                  goal_publisher=goal_publisher))
 
@@ -171,7 +185,7 @@ def main():
     entry = menu_handler.insert("living room", parent=h_first_entry,
                                 callback=partial(moveTo,
                                                  x=1.171529, y=-0.293936, z=0,
-                                                 R=0, P=0.003198, Y=0.029805,
+                                                 R=0, P=0.003169, Y=0.029805,
                                                  location='living room',
                                                  goal_publisher=goal_publisher))
     
@@ -196,3 +210,7 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+
+
+
