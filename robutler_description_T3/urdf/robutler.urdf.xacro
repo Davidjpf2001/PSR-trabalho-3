@@ -191,7 +191,7 @@
     <child link="object_joint"/>
     <origin xyz="0 0 0" rpy="0 0 0"/>
   </joint>
-
+  
   <link name="object_joint">
     <visual>
       <origin xyz="-0.23 0 0.1" rpy="0 0 0"/>
