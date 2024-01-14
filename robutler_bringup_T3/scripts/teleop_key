@@ -32,6 +32,8 @@ WAFFLE_MAX_ANG_VEL = 1.82
 LIN_VEL_STEP_SIZE = 0.05
 ANG_VEL_STEP_SIZE = 0.1
 
+
+#Display of teleop
 msg = f"""
             {Colors.CYAN}Control Your TurtleBot3{Colors.RESET}
           {Colors.CYAN}---------------------------{Colors.RESET}
@@ -51,6 +53,8 @@ msg = f"""
 e = f"""
 {Colors.RED}Communications Failed{Colors.RESET}
 """
+
+
 def getKey():
     if os.name == 'nt':
         timeout = 0.1
