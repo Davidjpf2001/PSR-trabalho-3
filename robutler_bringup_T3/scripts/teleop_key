@@ -5,6 +5,7 @@ from geometry_msgs.msg import Twist
 import sys
 import select
 import os
+
 if os.name == 'nt':
     import msvcrt
     import time
@@ -12,33 +13,45 @@ else:
     import tty
     import termios
 
+class Colors:
+    RESET = '\033[0m'
+    RED = '\033[91m'
+    GREEN = '\033[92m'
+    YELLOW = '\033[93m'
+    BLUE = '\033[94m'
+    MAGENTA = '\033[95m'
+    CYAN = '\033[96m'
+    WHITE = '\033[97m'
+
 BURGER_MAX_LIN_VEL = 0.22
 BURGER_MAX_ANG_VEL = 2.84
 
-WAFFLE_MAX_LIN_VEL = 0.86
+WAFFLE_MAX_LIN_VEL = 0.26
 WAFFLE_MAX_ANG_VEL = 1.82
 
 LIN_VEL_STEP_SIZE = 0.05
-ANG_VEL_STEP_SIZE = 0.05
+ANG_VEL_STEP_SIZE = 0.1
 
-msg = """
-Control Your TurtleBot3!
----------------------------
-Moving around:
-        w
-   a    s    d
-        x
 
-w/x : increase/decrease linear velocity (Burger : ~ 0.22, Waffle and Waffle Pi : ~ 0.26)
-a/d : increase/decrease angular velocity (Burger : ~ 2.84, Waffle and Waffle Pi : ~ 1.82)
+#Display of teleop
+msg = f"""
+            {Colors.CYAN}Control Your TurtleBot3{Colors.RESET}
+          {Colors.CYAN}---------------------------{Colors.RESET}
+                {Colors.GREEN}Moving around:{Colors.RESET}
+                    
+                     {Colors.YELLOW}w{Colors.RESET}
+                {Colors.YELLOW}a    s    d{Colors.RESET}
 
-space key, s : force stop
+      {Colors.YELLOW}w/s{Colors.RESET} : increase/decrease linear velocity
+      {Colors.YELLOW}a/d{Colors.RESET} : increase/decrease angular velocity
+{Colors.YELLOW}space key{Colors.RESET} : force stop
+        {Colors.YELLOW}m{Colors.RESET} : stop angular velocity  
 
-CTRL-C to quit
+{Colors.RED}CTRL-C to quit{Colors.RESET}
 """
 
-e = """
-Communications Failed
+e = f"""
+{Colors.RED}Communications Failed{Colors.RESET}
 """
 
 
@@ -65,10 +78,15 @@ def getKey():
     termios.tcsetattr(sys.stdin, termios.TCSADRAIN, settings)
     return key
 
-
 def vels(target_linear_vel, target_angular_vel):
-    return "currently:\tlinear vel %s\t angular vel %s " % (target_linear_vel, target_angular_vel)
+    return f"linear vel: {target_linear_vel:.2f}, angular vel: {target_angular_vel:.2f}"
 
+def print_instructions():
+    os.system('clear' if os.name == 'posix' else 'cls')  # Clear the terminal screen
+    print(msg)
+
+def print_status(target_linear_vel, target_angular_vel):
+    print("\033[F" + vels(target_linear_vel, target_angular_vel))
 
 def makeSimpleProfile(output, input, slop):
     if input > output:
@@ -80,7 +98,6 @@ def makeSimpleProfile(output, input, slop):
 
     return output
 
-
 def constrain(input, low, high):
     if input < low:
         input = low
@@ -90,7 +107,6 @@ def constrain(input, low, high):
         input = input
 
     return input
-
 
 def checkLinearLimitVelocity(vel):
     if turtlebot3_model == "burger":
@@ -102,7 +118,6 @@ def checkLinearLimitVelocity(vel):
 
     return vel
 
-
 def checkAngularLimitVelocity(vel):
     if turtlebot3_model == "burger":
         vel = constrain(vel, -BURGER_MAX_ANG_VEL, BURGER_MAX_ANG_VEL)
@@ -112,7 +127,6 @@ def checkAngularLimitVelocity(vel):
         vel = constrain(vel, -BURGER_MAX_ANG_VEL, BURGER_MAX_ANG_VEL)
 
     return vel
-
 
 if __name__ == "__main__":
     if os.name != 'nt':
@@ -130,41 +144,40 @@ if __name__ == "__main__":
     control_angular_vel = 0.0
 
     try:
-        print(msg)
+        print_instructions()
         while not rospy.is_shutdown():
             key = getKey()
             if key == 'w':
                 target_linear_vel = checkLinearLimitVelocity(target_linear_vel + LIN_VEL_STEP_SIZE)
                 status = status + 1
-                print(vels(target_linear_vel, target_angular_vel))
-            elif key == 'x':
+                print_status(target_linear_vel, target_angular_vel)
+            elif key == 's':
                 target_linear_vel = checkLinearLimitVelocity(target_linear_vel - LIN_VEL_STEP_SIZE)
                 status = status + 1
-                print(vels(target_linear_vel, target_angular_vel))
+                print_status(target_linear_vel, target_angular_vel)
             elif key == 'a':
                 target_angular_vel = checkAngularLimitVelocity(target_angular_vel + ANG_VEL_STEP_SIZE)
                 status = status + 1
-                print(vels(target_linear_vel, target_angular_vel))
+                print_status(target_linear_vel, target_angular_vel)
             elif key == 'd':
                 target_angular_vel = checkAngularLimitVelocity(target_angular_vel - ANG_VEL_STEP_SIZE)
                 status = status + 1
-                print(vels(target_linear_vel, target_angular_vel))
-            elif key == ' ' or key == 's':
+                print_status(target_linear_vel, target_angular_vel)
+            elif key == ' ':
                 target_linear_vel = 0.0
                 control_linear_vel = 0.0
                 target_angular_vel = 0.0
                 control_angular_vel = 0.0
-                print(vels(target_linear_vel, target_angular_vel))
+                print_status(target_linear_vel, target_angular_vel)
             elif key == 'm':
                 target_angular_vel = 0.0
-                print(vels(target_linear_vel, target_angular_vel))
-
+                print_status(target_linear_vel, target_angular_vel)
             else:
                 if (key == '\x03'):
                     break
 
             if status == 20:
-                print(msg)
+                print_instructions()
                 status = 0
 
             twist = Twist()
@@ -181,8 +194,9 @@ if __name__ == "__main__":
 
             pub.publish(twist)
 
-    except:
+    except Exception as ex:
         print(e)
+        print(f"Error: {ex}")
 
     finally:
         twist = Twist()
@@ -194,5 +208,5 @@ if __name__ == "__main__":
         twist.angular.z = 0.0
         pub.publish(twist)
 
-    if os.name != 'nt':
-        termios.tcsetattr(sys.stdin, termios.TCSADRAIN, settings)
+        if os.name != 'nt':
+            termios.tcsetattr(sys.stdin, termios.TCSADRAIN, settings)
