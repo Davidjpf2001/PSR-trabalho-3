@@ -23,7 +23,7 @@ def main():
                         default='Box_B')
 
     args = vars(parser.parse_args())  # creates a dictionary
-    print(args)
+    #print(args['location'])
 
     rospack = rospkg.RosPack()
     package_path = rospack.get_path('robutler_description_T3') + '/models/'
@@ -34,61 +34,89 @@ def main():
     ###########################################################################
     poses = {}
 
-    # on bed pose
+    # on bed pose #
     p = Pose()
     p.position = Point(x=-6.033466, y=1.971232, z=0.644345)
     q = quaternion_from_euler(0, 0, 0)  # From euler angles (rpy) to quaternion
     p.orientation = Quaternion(x=q[0], y=q[1], z=q[2], w=q[3])
     poses['on_bed'] = {'pose': p}
 
-    # on bed-side-table pose left
+    # on bed-side-table pose left #
     p = Pose()
     p.position = Point(x=-7.516057, y=2.733027, z=0.681438)
     q = quaternion_from_euler(0, 0, 0)  # From euler angles (rpy) to quaternion
     p.orientation = Quaternion(x=q[0], y=q[1], z=q[2], w=q[3])
     poses['on_bed_side_table_left'] = {'pose': p}
 
-    # on bed-side-table pose right
+    # on bed-side-table pose right #
     p = Pose()
     p.position = Point(x=-4.434177, y=2.860802, z=0.681438)
     q = quaternion_from_euler(0, 0, 0)  # From euler angles (rpy) to quaternion
     p.orientation = Quaternion(x=q[0], y=q[1], z=q[2], w=q[3])
     poses['on_bed_side_table_right'] = {'pose': p}
 
-    # table bedroom
+    # table bedroom #
     p = Pose()
-    p.position = Point(x=-8.854090, y=1.646590, z=0.845099)
-    q = quaternion_from_euler(0, 0, 0)  # From euler angles (rpy) to quaternion
+    p.position = Point(x=-8.967117, y=1.559003, z=0.739959)
+    q = quaternion_from_euler(0, 0, 0.787498)  # From euler angles (rpy) to quaternion
     p.orientation = Quaternion(x=q[0], y=q[1], z=q[2], w=q[3])
     poses['on_bedroom_table'] = {'pose': p}
 
-    # strange room on chair
+    # strange room on chair #
     p = Pose()
     p.position = Point(x=-8.204075, y=-4.446789, z=0.363266)
     q = quaternion_from_euler(0, 0, 0)  # From euler angles (rpy) to quaternion
     p.orientation = Quaternion(x=q[0], y=q[1], z=q[2], w=q[3])
     poses['chair_strange_room'] = {'pose': p}
 
-    # living_room_table
+    # living_room_table #
     p = Pose()
-    p.position = Point(x=1.000122, y=-1.638217, z=-1.638217)
+    p.position = Point(x=1.281256, y=-1.638220, z=0.361972)
     q = quaternion_from_euler(0, 0, 0)  # From euler angles (rpy) to quaternion
     p.orientation = Quaternion(x=q[0], y=q[1], z=q[2], w=q[3])
     poses['living_room_table'] = {'pose': p}
 
-    # living_room_sofa
+    # living_room_sofa #
     p = Pose()
     p.position = Point(x=-0.207158, y=-1.265936, z=0.495777)
     q = quaternion_from_euler(0, 0, 0)  # From euler angles (rpy) to quaternion
     p.orientation = Quaternion(x=q[0], y=q[1], z=q[2], w=q[3])
     poses['living_room_sofa'] = {'pose': p}
 
-    # table_gym
+    # table_gym #
     p = Pose()
     p.position = Point(x=-0.534364, y=4.018290, z=0.399243)
     q = quaternion_from_euler(0, 0, 0)  # From euler angles (rpy) to quaternion
     p.orientation = Quaternion(x=q[0], y=q[1], z=q[2], w=q[3])
     poses['table_gym'] = {'pose': p}
+
+    # table_kitchen #
+    p = Pose()
+    p.position = Point(x=6.644286, y=0.742703, z=0.801420)
+    q = quaternion_from_euler(0, 0, 0)  # From euler angles (rpy) to quaternion
+    p.orientation = Quaternion(x=q[0], y=q[1], z=q[2], w=q[3])
+    poses['table_kitchen'] = {'pose': p}
+
+    # living_room #
+    p = Pose()
+    p.position = Point(x=-0.033629, y=0.411562, z=0.000284)
+    q = quaternion_from_euler(0, 0, 0)  # From euler angles (rpy) to quaternion
+    p.orientation = Quaternion(x=q[0], y=q[1], z=q[2], w=q[3])
+    poses['living_room'] = {'pose': p}
+
+    # kitchen #
+    p = Pose()
+    p.position = Point(x=7.616100, y=-4.093740, z=0.000000)
+    q = quaternion_from_euler(0, 0, 0)  # From euler angles (rpy) to quaternion
+    p.orientation = Quaternion(x=q[0], y=q[1], z=q[2], w=q[3])
+    poses['kitchen'] = {'pose': p}
+
+    # bedroom #
+    p = Pose()
+    p.position = Point(x=-5.178481, y=0.496342, z=0.00)
+    q = quaternion_from_euler(0, 0, 3.116592)  # From euler angles (rpy) to quaternion
+    p.orientation = Quaternion(x=q[0], y=q[1], z=q[2], w=q[3])
+    poses['bedroom'] = {'pose': p}
 
     ############################################################################
     # Defines poses where to put objects (end)
@@ -97,7 +125,7 @@ def main():
 
 
 
-    # define objects
+    ########################### define objects ################################
     objects = {}
 
     # add object sphere_v
@@ -111,6 +139,22 @@ def main():
     #add object person_standing
     f = open(package_path + 'Box_B/model.sdf', 'r')
     objects['Box_B'] = {'name': 'Box_B', 'sdf': f.read()}
+
+    #add object computer
+    f = open(package_path + 'labtop_mac_1/model.sdf', 'r')
+    objects['labtop_mac_1'] = {'name': 'laptop_mac_1', 'sdf': f.read()}
+
+    #add object bottle red wine
+    f = open(package_path + 'bottle_red_wine/model.sdf', 'r')
+    objects['bottle_red_wine'] = {'name': 'bottle_red_wine', 'sdf': f.read()}
+
+    #add object bottle white wines
+    f = open(package_path + 'bottle_white_wine/model.sdf', 'r')
+    objects['bottle_white_wine'] = {'name': 'bottle_white_wine', 'sdf': f.read()}
+
+    ########################### define objects (end) ###########################
+
+
 
     #Check if given object and location are valid
 
@@ -137,10 +181,10 @@ def main():
 
     print('Spawning an object ...')
     uuid_str = str(uuid.uuid4())
-    service_client(objects['Box_B']['name'] + '_' + uuid_str,
-                   objects['Box_B']['sdf'],
-                   objects['Box_B']['name'] + '_' + uuid_str,
-                   poses['living_room_sofa']['pose'],
+    service_client(objects[args['object']]['name'] + '_' + uuid_str,
+                   objects[args['object']]['sdf'],
+                   objects[args['object']]['name'] + '_' + uuid_str,
+                   poses[args['location']]['pose'],
                    'world')
 
     print('Done')
