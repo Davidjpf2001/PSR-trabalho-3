@@ -152,6 +152,10 @@ def main():
     f = open(package_path + 'bottle_white_wine/model.sdf', 'r')
     objects['bottle_white_wine'] = {'name': 'bottle_white_wine', 'sdf': f.read()}
 
+    #add object bottle white wines
+    f = open(package_path + 'can_coke/model.sdf', 'r')
+    objects['can_coke'] = {'name': 'can_coke', 'sdf': f.read()}
+
     ########################### define objects (end) ###########################
 
 
