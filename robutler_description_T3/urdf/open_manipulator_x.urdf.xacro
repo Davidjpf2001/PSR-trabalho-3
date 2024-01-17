@@ -5,7 +5,7 @@
   <xacro:include filename="$(find robutler_description_T3)/urdf/open_manipulator_x.gazebo.xacro"/>
 
   <!-- Include OpenManipulator Transmission -->
-  <xacro:include filename="$(find robutler_description_T3/urdf/open_manipulator_x.transmission.xacro"/>
+  <xacro:include filename="$(find robutler_description_T3)/urdf/open_manipulator_x.transmission.xacro"/>
 
   <!-- Link 1 -->
   <link name="link1">
