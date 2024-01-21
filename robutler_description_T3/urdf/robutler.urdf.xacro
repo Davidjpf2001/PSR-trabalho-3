@@ -162,7 +162,7 @@
 
   <link name="base_scan">
     <visual>
-      <origin xyz="0 0 0.0" rpy="0 0 0"/>
+      <origin xyz="0.055 0.00 0" rpy="0 0 0"/>
       <geometry>
         <mesh filename="package://turtlebot3_description/meshes/sensors/lds.stl" scale="0.001 0.001 0.001"/>
       </geometry>
@@ -192,7 +192,7 @@
   </joint>
 
   <link name="camera_link">
-    <collision>
+    <collision>                                                                                                                                                                                                               
       <origin xyz="0.005 0.011 0.013" rpy="0 0 0"/>
       <geometry>
         <box size="0.015 0.030 0.027"/>
