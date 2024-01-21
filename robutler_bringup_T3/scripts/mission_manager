@@ -73,13 +73,13 @@ def makeBox(msg):
 
     # #Bola transparente em cima do robo, para parecer que estamos a carregar no robo
     # marker.type = Marker.SPHERE
-    # marker.scale.x = msg.scale * 0.6  # Ajuste o tamanho da esfera para torná-la um pouco menor
+    # marker.scale.x = msg.scale * 0.6  
     # marker.scale.y = msg.scale * 0.6
     # marker.scale.z = msg.scale * 0.6
     # marker.color.r = 0
     # marker.color.g = 0
-    # marker.color.b = 0  # Defina o componente azul para 1.0 para obter uma cor azul clara
-    # marker.color.a = 0  # Ajuste a opacidade conforme necessário
+    # marker.color.b = 0  
+    # marker.color.a = 0  # opacity
 
 
     return marker
