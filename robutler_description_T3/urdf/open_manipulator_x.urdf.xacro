@@ -177,6 +177,35 @@
     </inertial>
   </link>
 
+  <joint name="camera_joint_grip" type="fixed">
+    <origin xyz="0.073 -0.011 0.084" rpy="0 0 0"/>
+    <parent link="link5"/>
+    <child link="camera_link_grip"/>
+  </joint>
+
+  <link name="camera_link_grip">
+    <collision>                                                                                                                                                                                                               
+      <origin xyz="0.005 0.011 0.013" rpy="-1.57 0 -1.57"/>
+      <geometry>
+        <box size="0.015 0.030 0.027"/>
+      </geometry>
+    </collision>
+  </link>
+  
+  <joint name="camera_rgb_joint_grip" type="fixed">
+    <origin xyz="0.003 0.011 0.009" rpy="0 0 0"/>
+    <parent link="camera_link_grip"/>
+    <child link="camera_rgb_frame_grip"/>
+  </joint>
+  <link name="camera_rgb_frame_grip"/>
+
+  <joint name="camera_rgb_optical_joint_grip" type="fixed">
+    <origin xyz="0 0 0" rpy="-1.57 0 -1.57"/>
+    <parent link="camera_link_grip"/>
+    <child link="camera_rgb_optical_frame_grip"/>
+  </joint>
+  <link name="camera_rgb_optical_frame_grip"/>
+
   <!--  Gripper link -->
   <link name="gripper_link">
     <visual>
