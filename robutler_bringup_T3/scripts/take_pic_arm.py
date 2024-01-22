@@ -10,7 +10,7 @@ from datetime import datetime
 class ImageSubscriber:
     def __init__(self):
         self.bridge = CvBridge()
-        self.image_sub = rospy.Subscriber('/camera/rgb/image_raw', Image, self.image_callback)    # mudar camara
+        self.image_sub = rospy.Subscriber('/camera/rgb/image_raw_arm', Image, self.image_callback)    # mudar camara
         self.save_folder = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'captured_images')
         os.makedirs(self.save_folder, exist_ok=True)
         rospy.loginfo("Image Subscriber Initialized")
