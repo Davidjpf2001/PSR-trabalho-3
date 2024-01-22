@@ -14,7 +14,7 @@ def detect(img):
     # model
     model = YOLO("yolo-Weights/yolov8n.pt")
 
-    # object classes
+    # object classes yolo
     classNames = ["person", "bicycle", "car", "motorbike", "aeroplane", "bus", "train", "truck", "boat",
                 "traffic light", "fire hydrant", "stop sign", "parking meter", "bench", "bird", "cat",
                 "dog", "horse", "sheep", "cow", "elephant", "bear", "zebra", "giraffe", "backpack", "umbrella",
