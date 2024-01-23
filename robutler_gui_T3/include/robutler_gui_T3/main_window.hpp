@@ -16,8 +16,8 @@
 
 /* Authors: Ryan Shim */
 
-#ifndef robutler_gui_T3_MAIN_WINDOW_H
-#define robutler_gui_T3_MAIN_WINDOW_H
+#ifndef ROBUTLER_GUI_T3_MAIN_WINDOW_H
+#define ROBUTLER_GUI_T3_MAIN_WINDOW_H
 
 /*****************************************************************************
 ** Includes
@@ -69,4 +69,4 @@ private:
 
 }  // namespace robutler_gui_T3
 
-#endif // robutler_gui_T3_MAIN_WINDOW_H
+#endif // ROBUTLER_GUI_T3_MAIN_WINDOW_H

@@ -20,8 +20,8 @@
 ** Ifdefs
 *****************************************************************************/
 
-#ifndef robutler_gui_T3_QNODE_HPP_
-#define robutler_gui_T3_QNODE_HPP_
+#ifndef ROBUTLER_GUI_T3_QNODE_HPP_
+#define ROBUTLER_GUI_T3_QNODE_HPP_
 
 /*****************************************************************************
 ** Includes
@@ -113,4 +113,4 @@ private:
 
 }  // namespace robutler_gui_T3
 
-#endif /* robutler_gui_T3_QNODE_HPP_ */
+#endif /* ROBUTLER_GUI_T3_QNODE_HPP_ */
