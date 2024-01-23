@@ -18,7 +18,7 @@ from ultralytics import YOLO
 import math 
 
 from geometry_msgs.msg import Twist
-
+from colorama import Fore, Style
 
 server = None
 marker_pos = 1
@@ -154,33 +154,52 @@ def moveTo(feedback, x, y, z, R, P, Y, location, detects, goal_publisher):
     print('move base completed goal with result ' + str(result_msg))
     
     if detects == 1:
-        print('hello')
-        twist_publisher = rospy.Publisher('/cmd_vel', Twist, queue_size=1)
-    #     image_subscriber = ImageSubscriber()
-        #image_subscriber.set_detect_person(True)
-
-        # Girar 360 graus sobre si mesmo
-        for i in range(36):  # 36 passos para simular 360 graus (10 graus por passo)
-            # Publicar comandos Twist para girar o robô (ajuste conforme a lógica de controle do seu robô)
-            twist_cmd = Twist()
-            twist_cmd.angular.z = 0.1  # Ajuste a velocidade angular conforme necessário
-            twist_publisher.publish(twist_cmd)
-
-            # Aguarda um curto período entre os passos
-            rospy.sleep(0.5)  # Ajuste conforme necessário
-
-        # Após a rotação, desativa a detecção de pessoa
-        #image_subscriber.set_detect_person(False)
-
-        # Publica comandos Twist para parar o robô após a rotação
-        twist_cmd = Twist()
-        twist_publisher.publish(twist_cmd)
         
+        image_subscriber = ImageSubscriber()
+        image_subscriber.set_detect(True) 
+        for i in range(12):
+            
+            rotation_goal = PoseStamped()
+            rotation_goal.header.frame_id = 'base_link'
+            rotation_goal.pose.position.x = 0
+            rotation_goal.pose.position.y = 0
+            rotation_goal.pose.position.z = 0
+
+            q = quaternion_from_euler(0, 0, 1)
+            rotation_goal.pose.orientation = Quaternion(*q)
+
+            goal_publisher.publish(rotation_goal)
+
+            rospy.sleep(1.2)
+
+        
+        rospy.sleep(20.0)
+
+        obj = image_subscriber.det
+
+        image_subscriber.set_detect(False)
+
+        rospy.sleep(2.0)
+
+        if obj == 0:
+            print('\n')
+            print(Fore.BLUE + '---------------------------------------')
+            print(Fore.BLUE + 'There is no one in the room')
+            print(Fore.BLUE + '---------------------------------------')
+            print('\n')
+        else:
+            print('\n')
+            print(Fore.GREEN + '---------------------------------------')
+            print(Fore.GREEN + 'People detected in the room')
+            print(Fore.GREEN + '---------------------------------------' + Style.RESET_ALL)
+            print('\n')
+             
+
+def detect(img, bol):
+
+    obj = 0
 
     
-
-def detect(img):
-
     # model
     model = YOLO("yolo-Weights/yolov8n.pt")
 
@@ -199,53 +218,57 @@ def detect(img):
 
     
     results = model(img, stream=True)
+    
 
     # coordinates
     for r in results:
         boxes = r.boxes
-
+        i=+1
+        
         for box in boxes:
-            # bounding box
+
+            confidence = math.ceil((box.conf[0]*100))/100
+            
+            cls = int(box.cls[0])
+            
             x1, y1, x2, y2 = box.xyxy[0]
             x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2) # convert to int values
 
-            # put box in cam
-            cv2.rectangle(img, (x1, y1), (x2, y2), (255, 0, 255), 3)
+            area = math.fabs(x2-x1)*math.fabs(y2-y1)
+            
 
-            # confidence
-            confidence = math.ceil((box.conf[0]*100))/100
-            print("Confidence --->",confidence)
-
-            # class name
-            cls = int(box.cls[0])
-            print("Class name -->", classNames[cls])
-
-            # object details
-            org = [x1, y1]
-            font = cv2.FONT_HERSHEY_SIMPLEX
-            fontScale = 1
-            color = (255, 0, 0)
-            thickness = 2
-
-            cv2.putText(img, classNames[cls], org, font, fontScale, color, thickness)
-
-            cv2.imshow('Webcam', img)
-            cv2.waitKey(1)
-
+            if classNames[cls] == 'person' and area > 50000:
+                print("Confidence --->",confidence)
+                print(Fore.GREEN +'Person Detected'+ Style.RESET_ALL)
+                
+                obj =+ 1
+                
+    return obj 
+        
 
 class ImageSubscriber:
     def __init__(self):
         self.bridge = CvBridge()
-        self.image_sub = rospy.Subscriber('/camera/rgb/image_raw', Image, self.image_callback)
+        self.image_sub = rospy.Subscriber('/camera/rgb/image_raw_arm', Image, self.image_callback)
+        self.bol = False
+        self.det = 0
 
     def image_callback(self, data):
         try:
-            cv_image = self.bridge.imgmsg_to_cv2(data, "bgr8")
-            detect(cv_image)
-            
+            if self.bol is True:
+                cv_image = self.bridge.imgmsg_to_cv2(data, "bgr8")
+                obj = detect(cv_image, self.bol)
+    
+                self.det = self.det + obj
 
         except Exception as e:
             rospy.logerr(f"Erro ao converter imagem: {str(e)}")
+
+    def set_detect(self, value):
+        self.bol = value
+    
+    def objects(self, obj):
+        self.det = obj
 
 def main():
 
@@ -310,7 +333,7 @@ def main():
     
     entry = menu_handler.insert("bedroom", parent=detect_first_entry,
                                 callback=partial(moveTo,
-                                                 x=-6.126462, y=0.479290, z=0,
+                                                 x=-6.313216, y=-0.371866, z=0,
                                                  R=0.000004, P=0.003169, Y=4.479290,
                                                  location='bedroom',
                                                  detects = 1,
