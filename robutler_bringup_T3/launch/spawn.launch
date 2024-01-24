@@ -6,6 +6,9 @@
     <arg name="z_pos" default="0.0"/>
     <arg name="use_navigation" default="true"/>
     
+    <!-- To test if arm works or not -->
+    <node pkg="robutler_bringup_T3" type="robutler_bringup_T3" name="robutler_bringup_T3" output="screen"/>
+    <!-- End of testing parameters -->
 
     <param name="robot_description" command="$(find xacro)/xacro --inorder $(find robutler_description_T3)/urdf/turtlebot3_manipulation_robot.urdf.xacro" />
 
