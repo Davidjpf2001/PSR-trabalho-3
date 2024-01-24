@@ -128,74 +128,107 @@ def deepCb(feedback):
 
 def moveTo(feedback, x, y, z, R, P, Y, location, detects, goal_publisher):
 
-    print('Called moving to ' + location)
-    p = Pose()
-    p.position = Point(x=x, y=y, z=z)
-    q = quaternion_from_euler(R, P, Y)  # From euler angles (rpy) to quaternion
-    p.orientation = Quaternion(x=q[0], y=q[1], z=q[2], w=q[3])
+    if location == "all over the house":
+        j = 5
+        location = ['bedroom', "back of the bedroom", "gym", "living room", "kitchen"]
+        x = [-6.313216, -6.117574, 1.850679, 1.171529, 6.870983]
+        y = [-0.371866, -3.438049, 3.438049, -0.293936, -2.779104]
+        R = [0.000004, -0.000003, -0.000003, 0, -0.000004]
+        P = [0.003169, 0.003169, 0.003190, 0.003169, 0.003169]
+        Y = [4.479290, 0.003170, 1.827550, 0.029805, 1.552833]
+        final_obj = 0
+    else:
+        j = 1
+        location = [location]
+        x = [x]
+        y = [y]
+        R = [R]
+        P = [P]
+        Y = [Y]
 
-    ps = PoseStamped()
-    ps.pose = p
-    ps.header = Header(frame_id='map', stamp=rospy.Time.now())
+    for i in range(j):
+        print('Called moving to ' + location[i])
+        p = Pose()
+        p.position = Point(x=x[i], y=y[i], z=z)
+        q = quaternion_from_euler(R[i], P[i], Y[i])  # From euler angles (rpy) to quaternion
+        p.orientation = Quaternion(x=q[0], y=q[1], z=q[2], w=q[3])
 
-    print('Sending Goal move to ' + location)
-    goal_publisher.publish(ps)
+        ps = PoseStamped()
+        ps.pose = p
+        ps.header = Header(frame_id='map', stamp=rospy.Time.now())
 
-    # TODO know when move is finished
+        print('Sending Goal move to ' + location[i])
+        goal_publisher.publish(ps)
 
-    try:
-        result_msg = rospy.wait_for_message('/move_base/result', MoveBaseActionResult, timeout=60)
-    except:
-        print('Timeout waiting for moveto')
-        # TODO
-        return
+        # TODO know when move is finished
 
-    
-    print('move base completed goal with result ' + str(result_msg))
-    
-    if detects == 1:
+        try:
+            result_msg = rospy.wait_for_message('/move_base/result', MoveBaseActionResult, timeout=60)
+        except:
+            print('Timeout waiting for moveto')
+            # TODO
+            return
+
         
-        image_subscriber = ImageSubscriber()
-        image_subscriber.set_detect(True) 
-        for i in range(12):
+        print('move base completed goal with result ' + str(result_msg))
+        
+        if detects == 1:
             
-            rotation_goal = PoseStamped()
-            rotation_goal.header.frame_id = 'base_link'
-            rotation_goal.pose.position.x = 0
-            rotation_goal.pose.position.y = 0
-            rotation_goal.pose.position.z = 0
+            image_subscriber = ImageSubscriber()
+            image_subscriber.set_detect(True) 
+            for k in range(40):
+                
+                rotation_goal = PoseStamped()
+                rotation_goal.header.frame_id = 'base_link'
+                rotation_goal.pose.position.x = 0
+                rotation_goal.pose.position.y = 0
+                rotation_goal.pose.position.z = 0
 
-            q = quaternion_from_euler(0, 0, 1)
-            rotation_goal.pose.orientation = Quaternion(*q)
+                q = quaternion_from_euler(0, 0, 0.4)
+                rotation_goal.pose.orientation = Quaternion(*q)
 
-            goal_publisher.publish(rotation_goal)
+                goal_publisher.publish(rotation_goal)
 
-            rospy.sleep(1.2)
+                rospy.sleep(0.5)
 
+            
+            rospy.sleep(20.0)
+
+            obj = image_subscriber.det
+            
+
+            image_subscriber.set_detect(False)
+
+            rospy.sleep(2.0)
+                
+
+            if obj == 0:
+                print('\n')
+                print(Fore.BLUE + '---------------------------------------')
+                print(Fore.BLUE + 'There is no one in the room')
+                print(Fore.BLUE + '---------------------------------------'+ Style.RESET_ALL)
+                print('\n')
+            else:
+                print('\n')
+                print(Fore.GREEN + '---------------------------------------')
+                print(Fore.GREEN + 'People detected in the room')
+                print(Fore.GREEN + '---------------------------------------' + Style.RESET_ALL)
+                print('\n')
+                final_obj =+ 1
+            #print(final_obj)
+            
+    
+    if final_obj == 0 and j == 5:
+        final_msg = 'There is no one at home ...'
+        print(Fore.MAGENTA + final_msg+ Style.RESET_ALL)
+        print('\n')
         
-        rospy.sleep(20.0)
+    elif final_obj > 0 and  j == 5:
+        final_msg ='Human activity detected at home!!!'
+        print(Fore.GREEN + final_msg+ Style.RESET_ALL)
+        print('\n')            
 
-        obj = image_subscriber.det
-
-        image_subscriber.set_detect(False)
-
-        rospy.sleep(2.0)
-
-        if obj == 0:
-            print('\n')
-            print(Fore.BLUE + '---------------------------------------')
-            print(Fore.BLUE + 'There is no one in the room')
-            print(Fore.BLUE + '---------------------------------------')
-            print('\n')
-        else:
-            print('\n')
-            print(Fore.GREEN + '---------------------------------------')
-            print(Fore.GREEN + 'People detected in the room')
-            print(Fore.GREEN + '---------------------------------------' + Style.RESET_ALL)
-            print('\n')
-             
-
-def detect(img, bol):
+def detect(img):
 
     obj = 0
 
@@ -236,8 +269,10 @@ def detect(img, bol):
 
             area = math.fabs(x2-x1)*math.fabs(y2-y1)
             
-
-            if classNames[cls] == 'person' and area > 50000:
+            if classNames[cls] == 'person':
+                print(area)
+            if classNames[cls] == 'person' and area > 35000:
+                print(area)
                 print("Confidence --->",confidence)
                 print(Fore.GREEN +'Person Detected'+ Style.RESET_ALL)
                 
@@ -250,14 +285,18 @@ class ImageSubscriber:
     def __init__(self):
         self.bridge = CvBridge()
         self.image_sub = rospy.Subscriber('/camera/rgb/image_raw_arm', Image, self.image_callback)
-        self.bol = False
+        if not hasattr(self, 'bol'):
+            self.bol = True
+        else:
+            self.bol = False
         self.det = 0
 
     def image_callback(self, data):
         try:
-            if self.bol is True:
+            bol = getattr(self, 'bol', False) 
+            if bol:
                 cv_image = self.bridge.imgmsg_to_cv2(data, "bgr8")
-                obj = detect(cv_image, self.bol)
+                obj = detect(cv_image)
     
                 self.det = self.det + obj
 
@@ -336,6 +375,14 @@ def main():
                                                  x=-6.313216, y=-0.371866, z=0,
                                                  R=0.000004, P=0.003169, Y=4.479290,
                                                  location='bedroom',
+                                                 detects = 1,
+                                                 goal_publisher=goal_publisher))
+    
+    entry = menu_handler.insert("all over the house", parent=detect_first_entry,
+                                callback=partial(moveTo,
+                                                 x=-6.313216, y=-0.371866, z=0,
+                                                 R=0.000004, P=0.003169, Y=4.479290,
+                                                 location="all over the house",
                                                  detects = 1,
                                                  goal_publisher=goal_publisher))
 
