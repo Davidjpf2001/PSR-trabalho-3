@@ -278,7 +278,7 @@ def main():
     entry = menu_handler.insert("bedroom", parent=h_first_entry,
                                 callback=partial(moveTo,
                                                  x=-6.126462, y=0.479290, z=0,
-                                                 R=-0.000004, P=0.003169, Y=0.479290,
+                                                 R=-0.000004, P=0.003169, Y=0.00005,
                                                  location='bedroom',
                                                  detects = 0,
                                                  goal_publisher=goal_publisher))

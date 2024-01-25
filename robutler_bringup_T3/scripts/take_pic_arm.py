@@ -24,8 +24,8 @@ class ImageSubscriber:
             return
 
         # Process the image as needed (e.g., display or save)
-        timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
-        filename = f"captured_image_cam2_{timestamp}.jpg"
+        timestamp = datetime.now().strftime("%d-%m-%Y--%H:%M:%S")
+        filename = f"captured_image_arm_{timestamp}.jpg"
         self.save_image(cv_image, filename)
         rospy.signal_shutdown("Image captured. Exiting...")
 
