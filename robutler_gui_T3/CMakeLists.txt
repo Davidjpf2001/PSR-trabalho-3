@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(robutler_description_T3)
+project(robutler_gui_T3)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
-# add_compile_options(-std=c++11)
+add_compile_options(-std=c++11)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -11,8 +11,39 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
   std_msgs
+  sensor_msgs
+  moveit_msgs
+  moveit_core
+  moveit_ros_planning
+  moveit_ros_planning_interface
+  cmake_modules
 )
 
+find_package(Eigen3 REQUIRED)
+find_package(Qt5Widgets REQUIRED)
+
+set(${PROJECT_NAME}_SRCS
+  src/main.cpp
+  src/main_window.cpp
+  src/qnode.cpp
+)
+
+set(${PROJECT_NAME}_HDRS
+  include/${PROJECT_NAME}/main_window.hpp
+  include/${PROJECT_NAME}/qnode.hpp
+)
+
+set(${PROJECT_NAME}_UIS
+  ui/main_window.ui
+)
+
+set(${PROJECT_NAME}_INCLUDE_DIRECTORIES
+  "${CATKIN_DEVEL_PREFIX}/${CATKIN_GLOBAL_INCLUDE_DESTINATION}/${PROJECT_NAME}"
+)
+
+if(NOT EXISTS ${${PROJECT_NAME}_INCLUDE_DIRECTORIES})
+  file(MAKE_DIRECTORY ${${PROJECT_NAME}_INCLUDE_DIRECTORIES})
+endif()
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
 
@@ -103,11 +134,30 @@ find_package(catkin REQUIRED COMPONENTS
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-#  INCLUDE_DIRS include
-#  LIBRARIES robutler_description_T3
-#  CATKIN_DEPENDS roscpp rospy std_msgs
-#  DEPENDS system_lib
+  INCLUDE_DIRS include
+  CATKIN_DEPENDS
+    geometry_msgs
+    roscpp 
+    std_msgs 
+    sensor_msgs 
+    moveit_msgs
+    moveit_core
+    moveit_ros_planning
+    moveit_ros_planning_interface
+  DEPENDS EIGEN3
 )
+
+qt5_wrap_cpp(${PROJECT_NAME}_MOCS     ${${PROJECT_NAME}_HDRS})
+qt5_add_resources(${PROJECT_NAME}_RCC ${${PROJECT_NAME}_RESOURCES})
+
+# ensure generated header files are being created in the devel space
+set(_cmake_current_binary_dir "${CMAKE_CURRENT_BINARY_DIR}")
+set(CMAKE_CURRENT_BINARY_DIR ${robutler_gui_T3_INCLUDE_DIRECTORIES})
+
+qt5_wrap_ui(${PROJECT_NAME}_UIS_H ${${PROJECT_NAME}_UIS})
+
+set(CMAKE_CURRENT_BINARY_DIR "${_cmake_current_binary_dir}")
+
 
 ###########
 ## Build ##
@@ -116,13 +166,18 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 include_directories(
-# include
+  include
+  ${robutler_gui_T3_INCLUDE_DIRECTORIES}
   ${catkin_INCLUDE_DIRS}
+  ${EIGEN3_INCLUDE_DIRS}
 )
 
+add_executable(robutler_gui_T3 ${robutler_gui_T3_SRCS} ${robutler_gui_T3_MOCS} ${robutler_gui_T3_UIS_H} ${robutler_gui_T3_RCC})
+add_dependencies(robutler_gui_T3 ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(robutler_gui_T3 Qt5::Widgets ${catkin_LIBRARIES} ${Eigen3_LIBRARIES})
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/robutler_description_T3.cpp
+#   src/${PROJECT_NAME}/robutler_gui_T3.cpp
 # )
 
 ## Add cmake target dependencies of the library
@@ -133,7 +188,7 @@ include_directories(
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-# add_executable(${PROJECT_NAME}_node src/robutler_description_T3_node.cpp)
+# add_executable(${PROJECT_NAME}_node src/robutler_gui_T3_node.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -153,10 +208,18 @@ include_directories(
 #############
 ## Install ##
 #############
+install(TARGETS ${PROJECT_NAME}
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
 
-install(DIRECTORY launch meshes rviz urdf
+install(DIRECTORY include/${PROJECT_NAME}/
+  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+)
+
+install(DIRECTORY launch ui
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )
+
 
 # all install targets should use catkin DESTINATION variables
 # See http://ros.org/doc/api/catkin/html/adv_user_guide/variables.html
@@ -201,7 +264,7 @@ install(DIRECTORY launch meshes rviz urdf
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_robutler_description_T3.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_robutler_gui_T3.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()
