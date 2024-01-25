@@ -5,21 +5,27 @@
     <arg name="y_pos" default="0.16"/>
     <arg name="z_pos" default="0.0"/>
     <arg name="use_navigation" default="true"/>
+    <arg name="use_gui" default="false" />
+    
     
     <!-- To test if arm works or not -->
     <node pkg="robutler_bringup_T3" type="robutler_bringup_T3" name="robutler_bringup_T3" output="screen"/>
     <!-- End of testing parameters -->
 
-    <param name="robot_description" command="$(find xacro)/xacro --inorder $(find robutler_description_T3)/urdf/turtlebot3_manipulation_robot.urdf.xacro" />
 
     <node pkg="rviz" type="rviz" name="rviz" output="screen" args="-d $(find robutler_bringup_T3)/config/rviz.rviz"/>
+    <param name="robot_description" command="$(find xacro)/xacro --inorder $(find robutler_description_T3)/urdf/turtlebot3_manipulation_robot.urdf.xacro" />
     <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" args="-urdf -model robutler -x $(arg x_pos) -y $(arg y_pos) -z $(arg z_pos) -param robot_description" />
+
 
     <!-- Robot state publisher -->
     <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher" output="screen"/>
     
     <!-- Joint state publisher -->
-    <node pkg="joint_state_publisher" type="joint_state_publisher" name="joint_state_publisher" output="screen"/>
+    <node pkg="joint_state_publisher" type="joint_state_publisher" name="joint_state_publisher">
+    <param name="/use_gui" value="$(arg use_gui)"/>
+    <rosparam param="source_list">["/joint_states"]</rosparam>
+    </node>
    
    
     <group if="$(arg use_navigation)">
