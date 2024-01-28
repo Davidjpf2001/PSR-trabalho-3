@@ -327,10 +327,11 @@ class ImageSubscriberBase:
         self.save_folder = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'captured_images')
         os.makedirs(self.save_folder, exist_ok=True)
         self.picture_counter = 0  # Counter to track the number of pictures taken
+        self.bol = True  # Flag for detection (initialize to True)
         rospy.loginfo("Image Subscriber Initialized")
 
     def image_callback(self, data):
-        if self.picture_counter < 1:
+        if hasattr(self, 'bol') and self.bol and self.picture_counter < 1:
             try:
                 cv_image = self.bridge.imgmsg_to_cv2(data, "bgr8")
                 rospy.loginfo("Image received successfully")
@@ -348,6 +349,12 @@ class ImageSubscriberBase:
         cv2.imwrite(filepath, image)
         rospy.loginfo(f"Image saved as {filepath}")
 
+    def set_detect(self, value):
+        self.bol = value
+
+    def objects(self, obj):
+        self.det = obj
+
 
 class ImageSubscriberArm:
     def __init__(self):
@@ -356,10 +363,11 @@ class ImageSubscriberArm:
         self.save_folder = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'captured_images')
         os.makedirs(self.save_folder, exist_ok=True)
         self.picture_counter = 0  # Counter to track the number of pictures taken
+        self.bol = True  # Flag for detection (initialize to True)
         rospy.loginfo("Image Subscriber Initialized")
 
     def image_callback(self, data):
-        if self.picture_counter < 1:
+        if hasattr(self, 'bol') and self.bol and self.picture_counter < 1:
             try:
                 cv_image = self.bridge.imgmsg_to_cv2(data, "bgr8")
                 rospy.loginfo("Image received successfully")
@@ -376,7 +384,12 @@ class ImageSubscriberArm:
         filepath = os.path.join(self.save_folder, filename)
         cv2.imwrite(filepath, image)
         rospy.loginfo(f"Image saved as {filepath}")
-            
+
+    def set_detect(self, value):
+        self.bol = value
+
+    def objects(self, obj):
+        self.det = obj
 
 def take_pic(feedback, x):
 
