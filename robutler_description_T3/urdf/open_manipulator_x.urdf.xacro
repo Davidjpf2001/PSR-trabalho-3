@@ -262,7 +262,7 @@
       <geometry>
         <box size="0.01 0.01 0.01" />
       </geometry>
-      <material name="red"/>
+      <material name="green"/>
      </visual>
 
     <inertial>
