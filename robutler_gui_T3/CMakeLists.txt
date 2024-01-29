@@ -8,17 +8,16 @@ add_compile_options(-std=c++11)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
+  cmake_modules
+  geometry_msgs
   roscpp
-  rospy
   std_msgs
   sensor_msgs
   moveit_msgs
   moveit_core
   moveit_ros_planning
   moveit_ros_planning_interface
-  cmake_modules
 )
-
 find_package(Eigen3 REQUIRED)
 find_package(Qt5Widgets REQUIRED)
 
