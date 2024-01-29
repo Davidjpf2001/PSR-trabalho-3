@@ -37,7 +37,7 @@
 
   <!-- end effector link -->
   <gazebo reference="end_effector_link">
-    <material>Gazebo/Red</material>
+    <material>Gazebo/Green</material>
   </gazebo>
 
   <!-- ros_control plugin -->

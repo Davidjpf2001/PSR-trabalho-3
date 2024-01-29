@@ -145,7 +145,7 @@ def moveTo(feedback, x, y, z, R, P, Y, location, detects, what, goal_publisher):
         y = [-0.987608,-0.293936, -2.689699, 3.740522,  -2.779104]
         R = [0.000004,0, -0.000003, -0.000003,  -0.000004]
         P = [0.003169,  0.003169,0.003169, 0.003190, 0.003169]
-        Y = [1,1, 0.003170, -0.627186,  1.552833]
+        Y = [1,3, 0.003170, -2.027186,  1.552833]
         
     else:
         j = 1
@@ -273,8 +273,8 @@ def moveTo(feedback, x, y, z, R, P, Y, location, detects, what, goal_publisher):
                 final_angle_deg = np.degrees(final_angle)
                 deg = np.degrees(Q)
 
-                if (final_angle_deg + deg) > 410:
-                    Q = np.radians((final_angle_deg + deg) - 410)
+                if (final_angle_deg + deg) > 420:
+                    Q = np.radians((final_angle_deg + deg) - 420)
                     stop = 1
 
                 q = quaternion_from_euler(0, 0, Q)
