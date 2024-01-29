@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>robutler_manipulation</name>
+  <version>2.0.2</version>
+  <description>The robutler_manipulation package</description>
+
+
+  <license>TODO</license>
+  <author email="jhshim@robotis.com">Ryan Shim</author>
+  <maintainer email="diogo@todo.todo">diogo</maintainer>
+  <buildtool_depend>catkin</buildtool_depend>
+  <exec_depend>robutler_bringup_T3</exec_depend>
+  <exec_depend>robutler_description_T3</exec_depend>
+  <exec_depend>robutler_gui_T3</exec_depend>
+  <exec_depend>robutler_moveit_config_T3</exec_depend>
+  <exec_depend>robutler_navigation_T3</exec_depend>
+
+  <export><metapackage/></export>
+</package>
