@@ -10,7 +10,7 @@ from datetime import datetime
 class ImageSubscriber:
     def __init__(self):
         self.bridge = CvBridge()
-        self.image_sub = rospy.Subscriber('/camera/rgb/image_raw', Image, self.image_callback)
+        self.image_sub = rospy.Subscriber('/camera/rgb/image_raw_arm', Image, self.image_callback)    # mudar camara
         self.save_folder = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'captured_images')
         os.makedirs(self.save_folder, exist_ok=True)
         rospy.loginfo("Image Subscriber Initialized")
@@ -24,8 +24,8 @@ class ImageSubscriber:
             return
 
         # Process the image as needed (e.g., display or save)
-        timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
-        filename = f"captured_image_cam1_{timestamp}.jpg"
+        timestamp = datetime.now().strftime("%d-%m-%Y--%H:%M:%S")
+        filename = f"captured_image_arm_{timestamp}.jpg"
         self.save_image(cv_image, filename)
         rospy.signal_shutdown("Image captured. Exiting...")
 
@@ -42,6 +42,7 @@ def main():
         rospy.spin()
     except KeyboardInterrupt:
         print("Shutting down")
+
 
 if __name__ == '__main__':
     main()

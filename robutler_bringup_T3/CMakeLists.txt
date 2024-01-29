@@ -7,10 +7,14 @@ project(robutler_bringup_T3)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS
-  roscpp
-  rospy
-  std_msgs
+find_package(catkin REQUIRED
+  COMPONENTS
+    roscpp
+    actionlib
+    control_msgs
+    std_msgs
+    trajectory_msgs
+    moveit_msgs
 )
 
 ## System dependencies are found with CMake's conventions
@@ -116,9 +120,13 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 include_directories(
-# include
+  include
   ${catkin_INCLUDE_DIRS}
 )
+
+add_executable(robutler_bringup_T3 src/robutler_bringup_T3.cpp)
+add_dependencies(robutler_bringup_T3 ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(robutler_bringup_T3 ${catkin_LIBRARIES})
 
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
@@ -153,6 +161,14 @@ include_directories(
 #############
 ## Install ##
 #############
+
+install(TARGETS robutler_bringup_T3
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+
+install(DIRECTORY launch
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+)
 
 # all install targets should use catkin DESTINATION variables
 # See http://ros.org/doc/api/catkin/html/adv_user_guide/variables.html
