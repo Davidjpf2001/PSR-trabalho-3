@@ -20,6 +20,8 @@ import math
 from geometry_msgs.msg import Twist
 from colorama import Fore, Style
 import numpy as np
+import os
+from datetime import datetime
 
 server = None
 marker_pos = 1
@@ -63,24 +65,24 @@ def modeCb(feedback):
 def makeBox(msg):
     marker = Marker()
 
-    marker.type = Marker.SPHERE
-    marker.scale.x = msg.scale * 0.45
-    marker.scale.y = msg.scale * 0.45
-    marker.scale.z = msg.scale * 0.45
-    marker.color.r = 0.5
-    marker.color.g = 0.5
-    marker.color.b = 0.5
-    marker.color.a = 0.2
-
-    # #Bola transparente em cima do robo, para parecer que estamos a carregar no robo
     # marker.type = Marker.SPHERE
-    # marker.scale.x = msg.scale * 0.6  
-    # marker.scale.y = msg.scale * 0.6
-    # marker.scale.z = msg.scale * 0.6
-    # marker.color.r = 0
-    # marker.color.g = 0
-    # marker.color.b = 0  
-    # marker.color.a = 0  # opacity
+    # marker.scale.x = msg.scale * 0.45
+    # marker.scale.y = msg.scale * 0.45
+    # marker.scale.z = msg.scale * 0.45
+    # marker.color.r = 0.5
+    # marker.color.g = 0.5
+    # marker.color.b = 0.5
+    # marker.color.a = 0.2
+
+    #Bola transparente em cima do robo, para parecer que estamos a carregar no robo
+    marker.type = Marker.SPHERE
+    marker.scale.x = msg.scale * 0.6  
+    marker.scale.y = msg.scale * 0.6
+    marker.scale.z = msg.scale * 0.6
+    marker.color.r = 0
+    marker.color.g = 0
+    marker.color.b = 0  
+    marker.color.a = 0  # opacity
 
 
     return marker
@@ -99,11 +101,11 @@ def makeEmptyMarker(dummyBox=True):
     int_marker = InteractiveMarker()
     int_marker.header.frame_id = "base_link"
 
-    int_marker.pose.position.z = marker_pos
-    marker_pos += 1
+    # int_marker.pose.position.z = marker_pos
+    # marker_pos += 1
    
-    # int_marker.pose.position.z = 0  #posição de altura 0, ou seja sobreposto ao robo, para parecer que estamos a carregar no robo
-
+    int_marker.pose.position.z = 0  #h=0 
+    
     int_marker.scale = 1
     return int_marker
 
@@ -143,7 +145,7 @@ def moveTo(feedback, x, y, z, R, P, Y, location, detects, what, goal_publisher):
         y = [-0.987608,-0.293936, -2.689699, 3.740522,  -2.779104]
         R = [0.000004,0, -0.000003, -0.000003,  -0.000004]
         P = [0.003169,  0.003169,0.003169, 0.003190, 0.003169]
-        Y = [1,-1.839286, 0.003170, -0.627186,  1.552833]
+        Y = [1,3, 0.003170, -2.027186,  1.552833]
         
     else:
         j = 1
@@ -172,7 +174,7 @@ def moveTo(feedback, x, y, z, R, P, Y, location, detects, what, goal_publisher):
         # TODO know when move is finished
 
         try:
-            result_msg = rospy.wait_for_message('/move_base/result', MoveBaseActionResult, timeout=70)
+            result_msg = rospy.wait_for_message('/move_base/result', MoveBaseActionResult, timeout=120)
         except:
             print('Timeout waiting for moveto')
             # TODO
@@ -235,7 +237,7 @@ def moveTo(feedback, x, y, z, R, P, Y, location, detects, what, goal_publisher):
 
 
 
-                rospy.sleep(1)
+                rospy.sleep(0.3)
                 
                 if what == 'Person':
                     image_subscriber.set_detect(False)
@@ -244,9 +246,9 @@ def moveTo(feedback, x, y, z, R, P, Y, location, detects, what, goal_publisher):
                     image_subscriber.set_detect_s(False)
 
 
-                rospy.sleep(4)
+                rospy.sleep(2)
                 obj = image_subscriber.det
-                #print(obj)
+                # print(obj)
 
                 
                 rotation_goal = PoseStamped()
@@ -258,10 +260,14 @@ def moveTo(feedback, x, y, z, R, P, Y, location, detects, what, goal_publisher):
                 
                 if obj >= 1:
                     Q = 1.2
-                    c = c + 1
+                    if what == 'Person':
+                        c = c + 1
+
+                    else:
+                        c = c + obj
 
                 else:
-                    Q = 0.5
+                    Q = 0.6
                 
                 final_angle = final_angle + Q
                 final_angle_deg = np.degrees(final_angle)
@@ -398,9 +404,10 @@ def detect_spheres(img,max_B, min_B, max_G, min_G, max_R, min_R):
     count = 0
 
     for i in range(1, totalLabels):
-        if values[i, cv2.CC_STAT_AREA] > 100:
+        #print(values[i, cv2.CC_STAT_AREA])
+        if values[i, cv2.CC_STAT_AREA] > 500:
             count = count + 1
-            # print(count)
+
 
     return count
 
@@ -461,6 +468,72 @@ class ImageSubscriber:
         self.min_R = min_R
         self.max_R = max_R
 
+class ImageSubscriberBase:
+    def __init__(self):
+        self.bridge = CvBridge()
+        self.image_sub = rospy.Subscriber('/camera/rgb/image_raw', Image, self.image_callback)
+        self.save_folder = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'captured_images')
+        os.makedirs(self.save_folder, exist_ok=True)
+        self.picture_counter = 0  # Counter to track the number of pictures taken
+        rospy.loginfo("Image Subscriber Initialized")
+
+    def image_callback(self, data):
+        if self.picture_counter < 1:
+            try:
+                cv_image = self.bridge.imgmsg_to_cv2(data, "bgr8")
+                rospy.loginfo("Image received successfully")
+            except Exception as e:
+                rospy.logerr(f"Error converting image: {str(e)}")
+                return
+
+            timestamp = datetime.now().strftime("%d-%m-%Y--%H:%M:%S")
+            filename = f"captured_image_base_{timestamp}.jpg"
+            self.save_image(cv_image, filename)
+            self.picture_counter += 1
+
+    def save_image(self, image, filename):
+        filepath = os.path.join(self.save_folder, filename)
+        cv2.imwrite(filepath, image)
+        rospy.loginfo(f"Image saved as {filepath}")
+
+
+class ImageSubscriberArm:
+    def __init__(self):
+        self.bridge = CvBridge()
+        self.image_sub = rospy.Subscriber('/camera/rgb/image_raw_arm', Image, self.image_callback)
+        self.save_folder = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'captured_images')
+        os.makedirs(self.save_folder, exist_ok=True)
+        self.picture_counter = 0  # Counter to track the number of pictures taken
+        rospy.loginfo("Image Subscriber Initialized")
+
+    def image_callback(self, data):
+        if self.picture_counter < 1:
+            try:
+                cv_image = self.bridge.imgmsg_to_cv2(data, "bgr8")
+                rospy.loginfo("Image received successfully")
+            except Exception as e:
+                rospy.logerr(f"Error converting image: {str(e)}")
+                return
+
+            timestamp = datetime.now().strftime("%d-%m-%Y--%H:%M:%S")
+            filename = f"captured_image_arm_{timestamp}.jpg"
+            self.save_image(cv_image, filename)
+            self.picture_counter += 1
+
+    def save_image(self, image, filename):
+        filepath = os.path.join(self.save_folder, filename)
+        cv2.imwrite(filepath, image)
+        rospy.loginfo(f"Image saved as {filepath}")
+            
+
+def take_pic(feedback, x):
+
+    if x == 1:
+        image_subscriber = ImageSubscriberBase()
+
+    elif x == 2:
+        image_subscriber = ImageSubscriberArm()
+
 def main():
 
     global server
@@ -483,6 +556,7 @@ def main():
     detect_spheres_first_entry = menu_handler.insert("Detect Spheres")
     detect_cubes_first_entry = menu_handler.insert("Detect Cubes")
     Clean_first_entry = menu_handler.insert("Table Clean?")
+    pic_first_entry = menu_handler.insert("Take picture")
 
     
     
@@ -587,6 +661,14 @@ def main():
                                                  detects = 2,
                                                  what = 'Nothing',
                                                  goal_publisher=goal_publisher))
+    
+
+    ##################### Take pistures ################################
+    entry = menu_handler.insert("Base camera", parent=pic_first_entry,                               
+                            callback=partial(take_pic, x=1))                              
+    
+    entry = menu_handler.insert("Arm camera", parent=pic_first_entry,
+                            callback=partial(take_pic, x=2)) 
 
 
     
