@@ -65,24 +65,24 @@ def modeCb(feedback):
 def makeBox(msg):
     marker = Marker()
 
-    marker.type = Marker.SPHERE
-    marker.scale.x = msg.scale * 0.45
-    marker.scale.y = msg.scale * 0.45
-    marker.scale.z = msg.scale * 0.45
-    marker.color.r = 0.5
-    marker.color.g = 0.5
-    marker.color.b = 0.5
-    marker.color.a = 0.2
-
-    # #Bola transparente em cima do robo, para parecer que estamos a carregar no robo
     # marker.type = Marker.SPHERE
-    # marker.scale.x = msg.scale * 0.6  
-    # marker.scale.y = msg.scale * 0.6
-    # marker.scale.z = msg.scale * 0.6
-    # marker.color.r = 0
-    # marker.color.g = 0
-    # marker.color.b = 0  
-    # marker.color.a = 0  # opacity
+    # marker.scale.x = msg.scale * 0.45
+    # marker.scale.y = msg.scale * 0.45
+    # marker.scale.z = msg.scale * 0.45
+    # marker.color.r = 0.5
+    # marker.color.g = 0.5
+    # marker.color.b = 0.5
+    # marker.color.a = 0.2
+
+    #Bola transparente em cima do robo, para parecer que estamos a carregar no robo
+    marker.type = Marker.SPHERE
+    marker.scale.x = msg.scale * 0.6  
+    marker.scale.y = msg.scale * 0.6
+    marker.scale.z = msg.scale * 0.6
+    marker.color.r = 0
+    marker.color.g = 0
+    marker.color.b = 0  
+    marker.color.a = 0  # opacity
 
 
     return marker
@@ -101,11 +101,11 @@ def makeEmptyMarker(dummyBox=True):
     int_marker = InteractiveMarker()
     int_marker.header.frame_id = "base_link"
 
-    int_marker.pose.position.z = marker_pos
-    marker_pos += 1
+    # int_marker.pose.position.z = marker_pos
+    # marker_pos += 1
    
-    # int_marker.pose.position.z = 0  #posição de altura 0, ou seja sobreposto ao robo, para parecer que estamos a carregar no robo
-
+    int_marker.pose.position.z = 0  #h=0 
+    
     int_marker.scale = 1
     return int_marker
 
