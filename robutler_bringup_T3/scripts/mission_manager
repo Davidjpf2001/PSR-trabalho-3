@@ -19,6 +19,9 @@ import math
 
 from geometry_msgs.msg import Twist
 from colorama import Fore, Style
+import numpy as np
+import os
+from datetime import datetime
 
 server = None
 marker_pos = 1
@@ -126,17 +129,24 @@ def deepCb(feedback):
     rospy.loginfo("The deep sub-menu has been found.")
 
 
-def moveTo(feedback, x, y, z, R, P, Y, location, detects, goal_publisher):
+def moveTo(feedback, x, y, z, R, P, Y, location, detects, what, goal_publisher):
+    
+    # variáveis
+    c = 0
+    final_angle = 0
+    final_angle_deg = 0
+    stop = 0
+    total_c = 0
 
     if location == "all over the house":
         j = 5
-        location = ['bedroom', "back of the bedroom", "gym", "living room", "kitchen"]
-        x = [-6.313216, -6.117574, 1.850679, 1.171529, 6.870983]
-        y = [-0.371866, -3.438049, 3.438049, -0.293936, -2.779104]
-        R = [0.000004, -0.000003, -0.000003, 0, -0.000004]
-        P = [0.003169, 0.003169, 0.003190, 0.003169, 0.003169]
-        Y = [4.479290, 0.003170, 1.827550, 0.029805, 1.552833]
-        final_obj = 0
+        location = ['bedroom',"living room", "back of the bedroom", "gym", "kitchen"]
+        x = [-5.918161,1.171529, -6.174561, 1.290247,  6.870983]
+        y = [-0.987608,-0.293936, -2.689699, 3.740522,  -2.779104]
+        R = [0.000004,0, -0.000003, -0.000003,  -0.000004]
+        P = [0.003169,  0.003169,0.003169, 0.003190, 0.003169]
+        Y = [1,1, 0.003170, -0.627186,  1.552833]
+        
     else:
         j = 1
         location = [location]
@@ -147,6 +157,7 @@ def moveTo(feedback, x, y, z, R, P, Y, location, detects, goal_publisher):
         Y = [Y]
 
     for i in range(j):
+
         print('Called moving to ' + location[i])
         p = Pose()
         p.position = Point(x=x[i], y=y[i], z=z)
@@ -163,20 +174,82 @@ def moveTo(feedback, x, y, z, R, P, Y, location, detects, goal_publisher):
         # TODO know when move is finished
 
         try:
-            result_msg = rospy.wait_for_message('/move_base/result', MoveBaseActionResult, timeout=60)
+            result_msg = rospy.wait_for_message('/move_base/result', MoveBaseActionResult, timeout=120)
         except:
             print('Timeout waiting for moveto')
             # TODO
             return
+        
+        print('hello')
 
         
         print('move base completed goal with result ' + str(result_msg))
+
+        # if detects == 2:
+
+        #     rospy.sleep(2.0)
+        #     image_subscriber = ImageSubscriber()
+        #     image_subscriber.set_detect(True)
+        #     image_subscriber.set_detect_s(True)
+        #     rospy.sleep(2.0)
+        #     image_subscriber.set_detect(False)
+        #     image_subscriber.set_detect_s(False)
+
+        #     c = image_subscriber.det
+        #     #c = c-1
+        #     print('\n')
+        #     print(str(c) + ' spheres detected')
+
+
+
         
         if detects == 1:
             
             image_subscriber = ImageSubscriber()
-            image_subscriber.set_detect(True) 
-            for k in range(40):
+            #image_subscriber.set_detect(True) 
+            while stop == 0:
+
+                rospy.sleep(3)
+                if what == 'Person':
+                    image_subscriber.set_detect(True)
+                else:
+                    if what == 'Red Spheres':
+                        image_subscriber.max_B = 0
+                        image_subscriber.min_B = 0
+
+                        image_subscriber.max_G = 0
+                        image_subscriber.min_G = 0
+
+                        image_subscriber.max_R = 255
+                        image_subscriber.min_R = 101
+                    else:
+                        image_subscriber.max_B = 255
+                        image_subscriber.min_B = 40
+
+                        image_subscriber.max_G = 0
+                        image_subscriber.min_G = 0
+
+                        image_subscriber.max_R = 0
+                        image_subscriber.min_R = 0
+
+                    image_subscriber.set_detect(True)
+                    image_subscriber.set_detect_s(True)
+
+
+
+                rospy.sleep(0.3)
+                
+                if what == 'Person':
+                    image_subscriber.set_detect(False)
+                else:
+                    image_subscriber.set_detect(False)
+                    image_subscriber.set_detect_s(False)
+
+
+                rospy.sleep(2)
+                obj = image_subscriber.det
+                # print(obj)
+
                 
                 rotation_goal = PoseStamped()
                 rotation_goal.header.frame_id = 'base_link'
@@ -184,47 +257,65 @@ def moveTo(feedback, x, y, z, R, P, Y, location, detects, goal_publisher):
                 rotation_goal.pose.position.y = 0
                 rotation_goal.pose.position.z = 0
 
-                q = quaternion_from_euler(0, 0, 0.4)
+                
+                if obj >= 1:
+                    Q = 1.2
+                    if what == 'Person':
+                        c = c + 1
+
+                    else:
+                        c = c + obj
+
+                else:
+                    Q = 0.6
+                
+                final_angle = final_angle + Q
+                final_angle_deg = np.degrees(final_angle)
+                deg = np.degrees(Q)
+
+                if (final_angle_deg + deg) > 410:
+                    Q = np.radians((final_angle_deg + deg) - 410)
+                    stop = 1
+
+                q = quaternion_from_euler(0, 0, Q)
                 rotation_goal.pose.orientation = Quaternion(*q)
 
                 goal_publisher.publish(rotation_goal)
 
-                rospy.sleep(0.5)
+            final_angle = 0
+            final_angle_deg = 0
+            stop = 0
+            obj = 0
+            deg = 0
 
-            
-            rospy.sleep(20.0)
-
-            obj = image_subscriber.det
-            
-
-            image_subscriber.set_detect(False)
-
-            rospy.sleep(2.0)
+            rospy.sleep(3)
                 
 
-            if obj == 0:
+            if c == 0:
                 print('\n')
-                print(Fore.BLUE + '---------------------------------------')
-                print(Fore.BLUE + 'There is no one in the room')
-                print(Fore.BLUE + '---------------------------------------'+ Style.RESET_ALL)
+                print(Fore.BLUE + '-------------------------------------------')
+                print(Fore.BLUE + 'There is no ' + what + ' in the ' + location[i])
+                print(Fore.BLUE + '-------------------------------------------'+ Style.RESET_ALL)
                 print('\n')
             else:
                 print('\n')
-                print(Fore.GREEN + '---------------------------------------')
-                print(Fore.GREEN + 'People detected in the room')
-                print(Fore.GREEN + '---------------------------------------' + Style.RESET_ALL)
+                print(Fore.GREEN + '------------------------------------------')
+                print(Fore.GREEN + what + ' detected in the ' + location[i])
+                print(Fore.GREEN + '------------------------------------------' + Style.RESET_ALL)
                 print('\n')
-                final_obj =+ 1
-            #print(final_obj)
+
+            total_c = total_c + c
+            print(Fore.YELLOW + 'Total ' + what + ' detected: ' + str(total_c)+ Style.RESET_ALL)
+            c = 0
             
     
-    if final_obj == 0 and j == 5:
-        final_msg = 'There is no one at home ...'
+    if total_c == 0 and j == 5:
+        final_msg = 'There is no ' + what + ' at home ...'
         print(Fore.MAGENTA + final_msg+ Style.RESET_ALL)
         print('\n')
         
-    elif final_obj > 0 and  j == 5:
-        final_msg ='Human activity detected at home!!!'
+    elif total_c > 0 and j == 5:
+        final_msg = what + ' detected at home!!!'
         print(Fore.GREEN + final_msg+ Style.RESET_ALL)
         print('\n')            
 
@@ -232,7 +323,6 @@ def detect(img):
 
     obj = 0
 
-    
     # model
     model = YOLO("yolo-Weights/yolov8n.pt")
 
@@ -252,7 +342,7 @@ def detect(img):
     
     results = model(img, stream=True)
     
-
+    brk = 0
     # coordinates
     for r in results:
         boxes = r.boxes
@@ -272,33 +362,89 @@ def detect(img):
             if classNames[cls] == 'person':
                 print(area)
             if classNames[cls] == 'person' and area > 35000:
-                print(area)
                 print("Confidence --->",confidence)
                 print(Fore.GREEN +'Person Detected'+ Style.RESET_ALL)
+                # cv2.imshow('img',img)
+                # cv2.waitKey(1)
                 
-                obj =+ 1
+                obj = 1
+
+                if obj == 1:
+                    brk = 1
+                    break
+                    
+        
+        if brk == 1:
+            break
                 
-    return obj 
+    return obj
+
+def detect_spheres(img,max_B, min_B, max_G, min_G, max_R, min_R):
+
+    upper = np.array([max_B, max_G, max_R])
+    lower = np.array([min_B, min_G, min_R])
+
+    # print(upper)
+    # print(lower)
+    
+	# Mask Creation
+    image_rgb = cv2.inRange(img, lower, upper)
+    
+    #Showing changed Image
+    # cv2.imshow('TrackBar', image_rgb)
+    # cv2.waitKey(1)
+
+    analysis = cv2.connectedComponentsWithStats(image_rgb, 4, cv2.CV_32S)
+
+    # White Areas
+    (totalLabels, label_ids, values, centroid) = analysis
+
+    # for i in range(1, totalLabels):
+    #print(totalLabels -1)
+    count = 0
+
+    for i in range(1, totalLabels):
+        #print(values[i, cv2.CC_STAT_AREA])
+        if values[i, cv2.CC_STAT_AREA] > 500:
+            count = count + 1
+
+
+    return count
+
         
 
 class ImageSubscriber:
     def __init__(self):
         self.bridge = CvBridge()
         self.image_sub = rospy.Subscriber('/camera/rgb/image_raw_arm', Image, self.image_callback)
-        if not hasattr(self, 'bol'):
-            self.bol = True
-        else:
-            self.bol = False
         self.det = 0
+
+        self.bol = False
+        self.bol_2 = False
+
+        self.min_B = 0
+        self.max_B = 0
+
+        self.min_G = 0
+        self.max_G = 0
+
+        self.min_R = 0
+        self.max_R = 0
 
     def image_callback(self, data):
         try:
             bol = getattr(self, 'bol', False) 
             if bol:
                 cv_image = self.bridge.imgmsg_to_cv2(data, "bgr8")
-                obj = detect(cv_image)
-    
-                self.det = self.det + obj
+
+                bol_2 = getattr(self, 'bol_2', False) 
+
+                if bol_2:
+                    c = detect_spheres(cv_image,self.max_B, self.min_B, self.max_G, self.min_G, self.max_R, self.min_R)
+                    self.det = c
+                else:
+                    obj = detect(cv_image)
+                    self.det = obj
 
         except Exception as e:
             rospy.logerr(f"Erro ao converter imagem: {str(e)}")
@@ -306,8 +452,87 @@ class ImageSubscriber:
     def set_detect(self, value):
         self.bol = value
     
+    def set_detect_s(self, value):
+        self.bol_2= value
+    
     def objects(self, obj):
         self.det = obj
+    
+    def objects(self, max_B, min_B, max_G, min_G, max_R, min_R):
+        self.min_B = min_B
+        self.max_B = max_B
+
+        self.min_G = min_G
+        self.max_G = max_G
+
+        self.min_R = min_R
+        self.max_R = max_R
+
+class ImageSubscriberBase:
+    def __init__(self):
+        self.bridge = CvBridge()
+        self.image_sub = rospy.Subscriber('/camera/rgb/image_raw', Image, self.image_callback)
+        self.save_folder = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'captured_images')
+        os.makedirs(self.save_folder, exist_ok=True)
+        self.picture_counter = 0  # Counter to track the number of pictures taken
+        rospy.loginfo("Image Subscriber Initialized")
+
+    def image_callback(self, data):
+        if self.picture_counter < 1:
+            try:
+                cv_image = self.bridge.imgmsg_to_cv2(data, "bgr8")
+                rospy.loginfo("Image received successfully")
+            except Exception as e:
+                rospy.logerr(f"Error converting image: {str(e)}")
+                return
+
+            timestamp = datetime.now().strftime("%d-%m-%Y--%H:%M:%S")
+            filename = f"captured_image_base_{timestamp}.jpg"
+            self.save_image(cv_image, filename)
+            self.picture_counter += 1
+
+    def save_image(self, image, filename):
+        filepath = os.path.join(self.save_folder, filename)
+        cv2.imwrite(filepath, image)
+        rospy.loginfo(f"Image saved as {filepath}")
+
+
+class ImageSubscriberArm:
+    def __init__(self):
+        self.bridge = CvBridge()
+        self.image_sub = rospy.Subscriber('/camera/rgb/image_raw_arm', Image, self.image_callback)
+        self.save_folder = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'captured_images')
+        os.makedirs(self.save_folder, exist_ok=True)
+        self.picture_counter = 0  # Counter to track the number of pictures taken
+        rospy.loginfo("Image Subscriber Initialized")
+
+    def image_callback(self, data):
+        if self.picture_counter < 1:
+            try:
+                cv_image = self.bridge.imgmsg_to_cv2(data, "bgr8")
+                rospy.loginfo("Image received successfully")
+            except Exception as e:
+                rospy.logerr(f"Error converting image: {str(e)}")
+                return
+
+            timestamp = datetime.now().strftime("%d-%m-%Y--%H:%M:%S")
+            filename = f"captured_image_arm_{timestamp}.jpg"
+            self.save_image(cv_image, filename)
+            self.picture_counter += 1
+
+    def save_image(self, image, filename):
+        filepath = os.path.join(self.save_folder, filename)
+        cv2.imwrite(filepath, image)
+        rospy.loginfo(f"Image saved as {filepath}")
+            
+
+def take_pic(feedback, x):
+
+    if x == 1:
+        image_subscriber = ImageSubscriberBase()
+
+    elif x == 2:
+        image_subscriber = ImageSubscriberArm()
 
 def main():
 
@@ -328,6 +553,15 @@ def main():
     global h_first_entry, h_mode_last
     h_first_entry = menu_handler.insert("Move to")
     detect_first_entry = menu_handler.insert("Detect person")
+    detect_spheres_first_entry = menu_handler.insert("Detect Spheres")
+    detect_cubes_first_entry = menu_handler.insert("Detect Cubes")
+    Clean_first_entry = menu_handler.insert("Table Clean?")
+    pic_first_entry = menu_handler.insert("Take picture")
+
+    
+    
+    ############################################################################
+    ########################## moving Robo #####################################
 
     entry = menu_handler.insert("kitchen", parent=h_first_entry,
                                 callback=partial(moveTo,
@@ -335,6 +569,7 @@ def main():
                                                  R=-0.000004, P=0.003169, Y=1.552833,
                                                  location='kitchen',
                                                  detects = 0,
+                                                 what = 'Nothing',
                                                  goal_publisher=goal_publisher))
 
     entry = menu_handler.insert("bedroom", parent=h_first_entry,
@@ -343,14 +578,16 @@ def main():
                                                  R=-0.000004, P=0.003169, Y=0.00005,
                                                  location='bedroom',
                                                  detects = 0,
+                                                 what = 'Nothing',
                                                  goal_publisher=goal_publisher))
     
     entry = menu_handler.insert("back of the bedroom", parent=h_first_entry,
                                 callback=partial(moveTo,
-                                                 x=-6.117574, y=-3.438049, z=0,
+                                                 x=-5.487827, y=-3.539704, z=0,
                                                  R=-0.000003, P=0.003169, Y=0.003170,
                                                  location='back of the bedroam',
                                                  detects = 0,
+                                                 what = 'Nothing',
                                                  goal_publisher=goal_publisher))
 
     
@@ -360,6 +597,7 @@ def main():
                                                  R=0, P=0.003169, Y=0.029805,
                                                  location='living room',
                                                  detects = 0,
+                                                 what = 'Nothing',
                                                  goal_publisher=goal_publisher))
     
     entry = menu_handler.insert("gym", parent=h_first_entry,
@@ -368,14 +606,20 @@ def main():
                                                  R=-0.000003, P=0.003190, Y=1.827550,
                                                  location='gym',
                                                  detects = 0,
+                                                 what = 'Nothing',
                                                  goal_publisher=goal_publisher))
+    
+
+    ###############################################################################
+    ######################## detection of people ##################################
     
     entry = menu_handler.insert("bedroom", parent=detect_first_entry,
                                 callback=partial(moveTo,
                                                  x=-6.313216, y=-0.371866, z=0,
-                                                 R=0.000004, P=0.003169, Y=4.479290,
+                                                 R=0.0, P=0.0, Y=0,
                                                  location='bedroom',
                                                  detects = 1,
+                                                 what = 'Person',
                                                  goal_publisher=goal_publisher))
     
     entry = menu_handler.insert("all over the house", parent=detect_first_entry,
@@ -384,7 +628,50 @@ def main():
                                                  R=0.000004, P=0.003169, Y=4.479290,
                                                  location="all over the house",
                                                  detects = 1,
+                                                 what = 'Person',
                                                  goal_publisher=goal_publisher))
+    
+    
+    ######################### detect spheres and cubes ##########################
+    entry = menu_handler.insert("back of the bedroom", parent=detect_spheres_first_entry,
+                                callback=partial(moveTo,
+                                                 x=-6.174561, y=-2.689699, z=0,
+                                                 R=-0.000003, P=0.003169, Y=0.003170,
+                                                 location='back of the bedroam',
+                                                 detects = 1,
+                                                 what = 'Red Spheres',
+                                                 goal_publisher=goal_publisher))
+    
+    entry = menu_handler.insert("all over the house", parent=detect_cubes_first_entry,
+                                callback=partial(moveTo,
+                                                 x=-6.313216, y=-0.371866, z=0,
+                                                 R=0.000004, P=0.003169, Y=4.479290,
+                                                 location="all over the house",
+                                                 detects = 1,
+                                                 what = 'Blue Cubes',
+                                                 goal_publisher=goal_publisher))
+    
+    
+    ######################### Table Clean ##########################
+    entry = menu_handler.insert("living_room", parent=Clean_first_entry,
+                                callback=partial(moveTo,
+                                                 x=-6.174561, y=-2.689699, z=0,
+                                                 R=-0.000003, P=0.003169, Y=0.003170,
+                                                 location='living_room',
+                                                 detects = 2,
+                                                 what = 'Nothing',
+                                                 goal_publisher=goal_publisher))
+    
+
+    ##################### Take pistures ################################
+    entry = menu_handler.insert("Base camera", parent=pic_first_entry,                               
+                            callback=partial(take_pic, x=1))                              
+    
+    entry = menu_handler.insert("Arm camera", parent=pic_first_entry,
+                            callback=partial(take_pic, x=2)) 
+
+
+    
 
     # entry = menu_handler.insert("living room", parent=h_first_entry, callback=moveToLivingRoom)
 

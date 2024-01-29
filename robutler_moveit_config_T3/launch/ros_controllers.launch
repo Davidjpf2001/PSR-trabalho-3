@@ -8,4 +8,19 @@
   <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false"
     output="screen" args=""/>
 
+  <!-- arm controller -->
+<!--   <rosparam file="$(find robutler_moveit_config_T3)/config/arm_controller.yaml" command="load"/>
+ --> 
+<!--   <node name="arm_controller_spawner" pkg="controller_manager" type="controller_manager" respawn="false" output="screen" args="spawn arm_controller"/> 
+ -->
+  <!-- gripper controller 
+  <rosparam file="$(find robutler_moveit_config_T3)/config/gripper_controller.yaml" command="load"/>
+  <node name="gripper_controller_spawner" pkg="controller_manager" type="controller_manager" respawn="false" output="screen" args="spawn gripper_controller"/>-->
+  
+  <rosparam file="$(find robutler_moveit_config_T3)/config/gazebo_controller.yaml" command="load"/>
+
+  <!-- start joint state controller 
+  <rosparam file="$(find robutler_moveit_config_T3)/config/joint_state_controller.yaml" command="load"/>
+  <node name="joint_state_controller_spawner" pkg="controller_manager" type="controller_manager" output="screen"
+    args="spawn joint_state_controller" respawn="false"/>-->
 </launch>

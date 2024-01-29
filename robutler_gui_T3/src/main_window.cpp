@@ -234,4 +234,4 @@ void MainWindow::on_btn_set_gripper_clicked(void)
   }
   writeLog("Send gripper value");
 }
-}  // namespace turtlebot3_manipulation_gui
+}  // namespace robutler_gui_T3

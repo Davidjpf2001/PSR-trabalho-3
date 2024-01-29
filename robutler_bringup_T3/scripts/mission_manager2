@@ -242,7 +242,7 @@ def detect(img):
 
     
     # model
-    model = YOLO("yolo-Weights/yolov8n.pt")
+    #model = YOLO("yolo-Weights/yolov8n.pt")
 
     # object classes
     classNames = ["person", "bicycle", "car", "motorbike", "aeroplane", "bus", "train", "truck", "boat",
