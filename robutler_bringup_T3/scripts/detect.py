@@ -66,7 +66,7 @@ def detect(img):
 class ImageSubscriber:
     def __init__(self):
         self.bridge = CvBridge()
-        self.image_sub = rospy.Subscriber('/camera/rgb/image_raw', Image, self.image_callback)
+        self.image_sub = rospy.Subscriber('/camera/rgb/image_raw_arm', Image, self.image_callback)
 
     def image_callback(self, data):
         try:

@@ -141,8 +141,8 @@ def moveTo(feedback, x, y, z, R, P, Y, location, detects, what, goal_publisher):
     if location == "all over the house":
         j = 5
         location = ['bedroom',"living room", "back of the bedroom", "gym", "kitchen"]
-        x = [-5.918161,1.171529, -6.174561, 1.290247,  6.870983]
-        y = [-0.987608,-0.293936, -2.689699, 3.740522,  -2.779104]
+        x = [-6.357207,1.171529, -6.174561, 1.290247,  6.870983]
+        y = [-1.107090,0.024982, -2.689699, 3.740522,  -2.779104]
         R = [0.000004,0, -0.000003, -0.000003,  -0.000004]
         P = [0.003169,  0.003169,0.003169, 0.003190, 0.003169]
         Y = [1,3, 0.003170, -2.027186,  1.552833]
@@ -174,7 +174,7 @@ def moveTo(feedback, x, y, z, R, P, Y, location, detects, what, goal_publisher):
         # TODO know when move is finished
 
         try:
-            result_msg = rospy.wait_for_message('/move_base/result', MoveBaseActionResult, timeout=120)
+            result_msg = rospy.wait_for_message('/move_base/result', MoveBaseActionResult, timeout=180)
         except:
             print('Timeout waiting for moveto')
             # TODO
@@ -185,20 +185,48 @@ def moveTo(feedback, x, y, z, R, P, Y, location, detects, what, goal_publisher):
         
         print('move base completed goal with result ' + str(result_msg))
 
-        # if detects == 2:
+        if detects == 2:
 
-        #     rospy.sleep(2.0)
-        #     image_subscriber = ImageSubscriber()
-        #     image_subscriber.set_detect(True)
-        #     image_subscriber.set_detect_s(True)
-        #     rospy.sleep(2.0)
-        #     image_subscriber.set_detect(False)
-        #     image_subscriber.set_detect_s(False)
+            rospy.sleep(2.0)
+            image_subscriber = ImageSubscriber()
+            image_subscriber.set_detect_T(True)
+    
+            rospy.sleep(2.0)
+            image_subscriber.set_detect_T(False)
+            rospy.sleep(2.0)
 
-        #     c = image_subscriber.det
-        #     #c = c-1
-        #     print('\n')
-        #     print(str(c) + ' spheres detected')
+
+            c = image_subscriber.det
+
+            if c == 0:
+                print('\n')
+                print(Fore.BLUE + '-------------------------------------------')
+                print('Table Clean')
+                print(Fore.BLUE + '-------------------------------------------'+ Style.RESET_ALL)
+                print('\n')
+
+            elif c == 2:
+                print('\n')
+                print(Fore.GREEN + '-------------------------------------------')
+                print('Table is not clean, there is a laptop')
+                print(Fore.GREEN + '-------------------------------------------'+ Style.RESET_ALL)
+                print('\n')
+            
+            elif c == 1:
+                print('\n')
+                print(Fore.GREEN + '-------------------------------------------')
+                print('Table is not clean, there is a bottle')
+                print(Fore.GREEN + '-------------------------------------------'+ Style.RESET_ALL)
+                print('\n')
+            
+            elif c == 3:
+                print('\n')
+                print(Fore.GREEN + '-------------------------------------------')
+                print('Table is not clean, there is a laptop and a bottle')
+                print(Fore.GREEN + '-------------------------------------------'+ Style.RESET_ALL)
+                print('\n')
+        
+            c = 0
 
 
 
@@ -267,7 +295,7 @@ def moveTo(feedback, x, y, z, R, P, Y, location, detects, what, goal_publisher):
                         c = c + obj
 
                 else:
-                    Q = 0.6
+                    Q = 0.65
                 
                 final_angle = final_angle + Q
                 final_angle_deg = np.degrees(final_angle)
@@ -289,6 +317,9 @@ def moveTo(feedback, x, y, z, R, P, Y, location, detects, what, goal_publisher):
             deg = 0
 
             rospy.sleep(3)
+
+            if location[i] == 'back of the bedroom' and what == 'Person':
+                c = c - 1
                 
 
             if c == 0:
@@ -318,6 +349,72 @@ def moveTo(feedback, x, y, z, R, P, Y, location, detects, what, goal_publisher):
         final_msg = what + ' detected at home!!!'
         print(Fore.GREEN + final_msg+ Style.RESET_ALL)
         print('\n')            
+
+########################## Mesa #############################
+
+def detect_T(img):
+
+    obj = 0
+
+    # model
+    model = YOLO("yolo-Weights/yolov8n.pt")
+
+    # object classes
+    classNames = ["person", "bicycle", "car", "motorbike", "aeroplane", "bus", "train", "truck", "boat",
+                "traffic light", "fire hydrant", "stop sign", "parking meter", "bench", "bird", "cat",
+                "dog", "horse", "sheep", "cow", "elephant", "bear", "zebra", "giraffe", "backpack", "umbrella",
+                "handbag", "tie", "suitcase", "frisbee", "skis", "snowboard", "sports ball", "kite", "baseball bat",
+                "baseball glove", "skateboard", "surfboard", "tennis racket", "bottle", "wine glass", "cup",
+                "fork", "knife", "spoon", "bowl", "banana", "apple", "sandwich", "orange", "broccoli",
+                "carrot", "hot dog", "pizza", "donut", "cake", "chair", "sofa", "pottedplant", "bed",
+                "diningtable", "toilet", "tvmonitor", "laptop", "mouse", "remote", "keyboard", "cell phone",
+                "microwave", "oven", "toaster", "sink", "refrigerator", "book", "clock", "vase", "scissors",
+                "teddy bear", "hair drier", "toothbrush"
+                ]
+
+    
+    results = model(img, stream=True)
+    
+    brk = 0
+    # coordinates
+    for r in results:
+        boxes = r.boxes
+        i=+1
+        
+        for box in boxes:
+
+            confidence = math.ceil((box.conf[0]*100))/100
+            
+            cls = int(box.cls[0])
+            
+            x1, y1, x2, y2 = box.xyxy[0]
+            x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2) # convert to int values
+
+            area = math.fabs(x2-x1)*math.fabs(y2-y1)
+            
+            if classNames[cls] == 'laptop':
+                print(Fore.GREEN +'Laptop Detected'+ Style.RESET_ALL)
+                
+                obj = obj + 2
+            
+            if classNames[cls] == 'bottle':
+                print(Fore.GREEN +'bottle Detected'+ Style.RESET_ALL)
+                
+                obj = obj + 1
+
+            if obj >= 1:
+                brk = 1
+                break
+                    
+        
+        if brk == 1:
+            break
+                
+    return obj
+
+
+
+##################################### Pessoas ####################################
 
 def detect(img):
 
@@ -421,6 +518,7 @@ class ImageSubscriber:
 
         self.bol = False
         self.bol_2 = False
+        self.bol_3 = False
 
         self.min_B = 0
         self.max_B = 0
@@ -433,7 +531,8 @@ class ImageSubscriber:
 
     def image_callback(self, data):
         try:
-            bol = getattr(self, 'bol', False) 
+            bol = getattr(self, 'bol', False)
+            bol_3 = getattr(self, 'bol_3', False) 
             if bol:
                 cv_image = self.bridge.imgmsg_to_cv2(data, "bgr8")
 
@@ -445,6 +544,10 @@ class ImageSubscriber:
                 else:
                     obj = detect(cv_image)
                     self.det = obj
+            elif bol_3:
+                cv_image = self.bridge.imgmsg_to_cv2(data, "bgr8")
+                t = detect_T(cv_image)
+                self.det = t
 
         except Exception as e:
             rospy.logerr(f"Erro ao converter imagem: {str(e)}")
@@ -454,6 +557,9 @@ class ImageSubscriber:
     
     def set_detect_s(self, value):
         self.bol_2= value
+    
+    def set_detect_T(self, value):
+        self.bol_3= value
     
     def objects(self, obj):
         self.det = obj
@@ -593,7 +699,7 @@ def main():
     
     entry = menu_handler.insert("living room", parent=h_first_entry,
                                 callback=partial(moveTo,
-                                                 x=1.171529, y=-0.293936, z=0,
+                                                 x=1.171529, y=0.024982, z=0,
                                                  R=0, P=0.003169, Y=0.029805,
                                                  location='living room',
                                                  detects = 0,
@@ -655,11 +761,11 @@ def main():
     ######################### Table Clean ##########################
     entry = menu_handler.insert("living_room", parent=Clean_first_entry,
                                 callback=partial(moveTo,
-                                                 x=-6.174561, y=-2.689699, z=0,
-                                                 R=-0.000003, P=0.003169, Y=0.003170,
+                                                 x=1.417671, y=0.057321, z=0,
+                                                 R=-0.000002, P=0.003190, Y=-1.7,
                                                  location='living_room',
                                                  detects = 2,
-                                                 what = 'Nothing',
+                                                 what = 'nothing',
                                                  goal_publisher=goal_publisher))
     
 

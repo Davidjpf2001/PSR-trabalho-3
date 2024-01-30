@@ -69,12 +69,32 @@ def main():
     p.orientation = Quaternion(x=q[0], y=q[1], z=q[2], w=q[3])
     poses['chair_strange_room'] = {'pose': p}
 
+    p = Pose()
+    p.position = Point(x=-3.077510, y=-3.422060, z=0.0)
+    q = quaternion_from_euler(0, 0, 0)  # From euler angles (rpy) to quaternion
+    p.orientation = Quaternion(x=q[0], y=q[1], z=q[2], w=q[3])
+    poses['back_of_bedroom'] = {'pose': p}
+
     # living_room_table #
     p = Pose()
     p.position = Point(x=1.281256, y=-1.638220, z=0.361972)
     q = quaternion_from_euler(0, 0, 0)  # From euler angles (rpy) to quaternion
     p.orientation = Quaternion(x=q[0], y=q[1], z=q[2], w=q[3])
     poses['living_room_table'] = {'pose': p}
+
+    # living_room_floor_1 #
+    p = Pose()
+    p.position = Point(x=1.718000, y=-1.076170, z=0.0)
+    q = quaternion_from_euler(0, 0, 0)  # From euler angles (rpy) to quaternion
+    p.orientation = Quaternion(x=q[0], y=q[1], z=q[2], w=q[3])
+    poses['living_room_floor_1'] = {'pose': p}
+
+    # living_room_floor_2 #
+    p = Pose()
+    p.position = Point(x=1.495096, y=-1.068661, z=0.0)
+    q = quaternion_from_euler(0, 0, 3.140109)  # From euler angles (rpy) to quaternion
+    p.orientation = Quaternion(x=q[0], y=q[1], z=q[2], w=q[3])
+    poses['living_room_floor_2'] = {'pose': p}
 
     # living_room_sofa #
     p = Pose()
